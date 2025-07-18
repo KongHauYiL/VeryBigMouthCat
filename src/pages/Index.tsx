@@ -68,7 +68,8 @@ const Index = () => {
       <div className="pt-20 pb-8 px-4 flex flex-col items-center justify-center min-h-screen space-y-8">
         {/* Simple global taps display */}
         <div className="text-center">
-          <p className="text-sm text-muted-foreground font-medium mb-2">Global Taps</p>
+          <p className="text-sm text-muted-foreground font-medium mb-2">
+            Global Taps</p>
           <p className="text-4xl font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">
             {isLoading ? (
               <span className="animate-pulse">---.---</span>
