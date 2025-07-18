@@ -10,17 +10,13 @@ import { useSettings } from '@/hooks/useSettings';
 const Index = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { globalTaps, personalTaps, isLoading, handleTap } = useGlobalTaps();
+  const { globalTaps, handleTap, isLoading } = useGlobalTaps();
   const { settings } = useSettings();
 
-  // Apply dark mode
+  // Apply dark mode (always enabled)
   useEffect(() => {
-    if (settings.darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [settings.darkMode]);
+    document.documentElement.classList.add('dark');
+  }, []);
 
   // Show PWA install prompt
   useEffect(() => {
@@ -54,7 +50,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-rose-50 to-pink-50 dark:from-orange-950/20 dark:via-rose-950/20 dark:to-pink-950/20 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-orange-950/20 via-rose-950/20 to-pink-950/20 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-rose-300/20 to-orange-300/20 rounded-full blur-3xl"></div>
@@ -70,18 +66,20 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="pt-20 pb-8 px-4 flex flex-col items-center justify-center min-h-screen space-y-8">
-        {/* Hero Text */}
-        <div className="text-center space-y-4 max-w-2xl">
-          <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">
-            Tap BigMouthCat and connect with the world! 🌍
-          </h2>
-          <p className="text-muted-foreground text-lg">
-            Every tap counts. Join thousands of players worldwide in this global tapping experience.
+        {/* Simple global taps display */}
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground font-medium mb-2">Global Taps</p>
+          <p className="text-4xl font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">
+            {isLoading ? (
+              <span className="animate-pulse">---.---</span>
+            ) : (
+              globalTaps.toLocaleString()
+            )}
           </p>
         </div>
 
         {/* Tap Character */}
-        <TapCharacter onTap={handleTap} personalTaps={personalTaps} />
+        <TapCharacter onTap={handleTap} />
 
         {/* Instructions */}
         <div className="text-center text-muted-foreground max-w-md bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/30">

@@ -67,16 +67,6 @@ export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
             />
           </div>
 
-          {/* Dark Mode Toggle */}
-          <div className="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-            <Label htmlFor="darkMode" className="text-sm font-medium">Dark Mode</Label>
-            <Switch
-              id="darkMode"
-              checked={settings.darkMode}
-              onCheckedChange={(checked) => updateSettings({ darkMode: checked })}
-            />
-          </div>
-
           {/* Reset Personal Counter */}
           <div className="pt-4 border-t border-white/20">
             <Button

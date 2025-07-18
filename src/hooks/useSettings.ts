@@ -11,7 +11,7 @@ export interface Settings {
 const defaultSettings: Settings = {
   soundEnabled: true,
   vibrationEnabled: true,
-  darkMode: false,
+  darkMode: true, // Force dark mode as default
   username: `Tapper${Math.floor(Math.random() * 9999)}`,
 };
 
@@ -19,7 +19,12 @@ export function useSettings() {
   const [settings, setSettings] = useLocalStorage<Settings>('globalTapSettings', defaultSettings);
 
   const updateSettings = (updates: Partial<Settings>) => {
-    setSettings(prev => ({ ...prev, ...updates }));
+    // Force dark mode to always be true
+    const updatedSettings = { ...updates };
+    if ('darkMode' in updatedSettings) {
+      updatedSettings.darkMode = true;
+    }
+    setSettings(prev => ({ ...prev, ...updatedSettings }));
   };
 
   const resetPersonalCounter = () => {
@@ -27,8 +32,14 @@ export function useSettings() {
     window.location.reload();
   };
 
+  // Ensure dark mode is always enabled
+  const settingsWithForcedDarkMode = {
+    ...settings,
+    darkMode: true
+  };
+
   return {
-    settings,
+    settings: settingsWithForcedDarkMode,
     updateSettings,
     resetPersonalCounter,
   };

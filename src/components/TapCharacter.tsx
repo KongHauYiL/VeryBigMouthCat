@@ -4,10 +4,9 @@ import { useSettings } from '@/hooks/useSettings';
 
 interface TapCharacterProps {
   onTap: () => void;
-  personalTaps: number;
 }
 
-export function TapCharacter({ onTap, personalTaps }: TapCharacterProps) {
+export function TapCharacter({ onTap }: TapCharacterProps) {
   const { settings } = useSettings();
   const [isAnimating, setIsAnimating] = useState(false);
   const [isMouthOpen, setIsMouthOpen] = useState(false);
@@ -81,14 +80,6 @@ export function TapCharacter({ onTap, personalTaps }: TapCharacterProps) {
             </>
           )}
         </div>
-      </div>
-      
-      {/* Personal tap counter */}
-      <div className="text-center bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/30">
-        <p className="text-sm text-muted-foreground font-medium">Your taps</p>
-        <p className="text-3xl font-bold text-primary bg-gradient-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">
-          {personalTaps.toLocaleString()}
-        </p>
       </div>
     </div>
   );
