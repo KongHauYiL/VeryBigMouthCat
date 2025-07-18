@@ -69,7 +69,7 @@ const Index = () => {
         {/* Simple global taps display */}
         <div className="text-center">
           <p className="text-sm text-muted-foreground font-medium mb-2">
-           ------------------------------------------------------------------------
+           ------------------------------------------------------------------------------------------------------------------------------------------
           Global taps</p>
           <p className="text-4xl font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">
             {isLoading ? (
