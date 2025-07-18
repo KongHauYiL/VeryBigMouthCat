@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useSettings } from '@/hooks/useSettings';
-import { Settings, X, RotateCcw } from 'lucide-react';
+import { X, RotateCcw } from 'lucide-react';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -15,34 +15,17 @@ interface SettingsPanelProps {
 export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
   const { settings, updateSettings, resetPersonalCounter } = useSettings();
 
-  React.useEffect(() => {
-    if (settings.darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [settings.darkMode]);
-
-  if (!isOpen) {
-    return (
-      <Button
-        onClick={onToggle}
-        variant="outline"
-        size="icon"
-        className="fixed top-4 right-4 rounded-full w-12 h-12 shadow-lg"
-      >
-        <Settings className="h-5 w-5" />
-      </Button>
-    );
-  }
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-background border border-border rounded-2xl shadow-xl w-full max-w-md">
+      <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-md">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-lg font-semibold">Settings</h2>
-          <Button onClick={onToggle} variant="ghost" size="icon">
+        <div className="flex items-center justify-between p-6 border-b border-white/20">
+          <h2 className="text-xl font-bold bg-gradient-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">
+            Settings
+          </h2>
+          <Button onClick={onToggle} variant="ghost" size="icon" className="hover:bg-white/20">
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -51,18 +34,22 @@ export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
         <div className="p-6 space-y-6">
           {/* Username */}
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username" className="text-sm font-medium">Username</Label>
             <Input
               id="username"
               value={settings.username}
               onChange={(e) => updateSettings({ username: e.target.value })}
               placeholder="Enter your username"
+              className="bg-white/20 backdrop-blur-md border-white/30 focus:border-rose-400"
             />
+            <p className="text-xs text-muted-foreground">
+              Cannot contain "server" in any form
+            </p>
           </div>
 
           {/* Sound Toggle */}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="sound">Sound Effects</Label>
+          <div className="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+            <Label htmlFor="sound" className="text-sm font-medium">Sound Effects</Label>
             <Switch
               id="sound"
               checked={settings.soundEnabled}
@@ -71,8 +58,8 @@ export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
           </div>
 
           {/* Vibration Toggle */}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="vibration">Vibration</Label>
+          <div className="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+            <Label htmlFor="vibration" className="text-sm font-medium">Vibration</Label>
             <Switch
               id="vibration"
               checked={settings.vibrationEnabled}
@@ -81,8 +68,8 @@ export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
           </div>
 
           {/* Dark Mode Toggle */}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="darkMode">Dark Mode</Label>
+          <div className="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
+            <Label htmlFor="darkMode" className="text-sm font-medium">Dark Mode</Label>
             <Switch
               id="darkMode"
               checked={settings.darkMode}
@@ -91,11 +78,11 @@ export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
           </div>
 
           {/* Reset Personal Counter */}
-          <div className="pt-4 border-t border-border">
+          <div className="pt-4 border-t border-white/20">
             <Button
               onClick={resetPersonalCounter}
               variant="outline"
-              className="w-full"
+              className="w-full bg-white/10 backdrop-blur-md border-white/30 hover:bg-white/20"
             >
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset Personal Counter

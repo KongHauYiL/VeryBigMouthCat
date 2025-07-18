@@ -1,7 +1,7 @@
 
 {
-  "name": "Global Tap - Connect Through Taps",
-  "short_name": "Global Tap",
+  "name": "BigMouthCat - Global Tapping Experience",
+  "short_name": "BigMouthCat",
   "description": "A delightful global tapping experience where every tap connects you with people worldwide",
   "start_url": "/",
   "display": "standalone",
@@ -10,15 +10,15 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/placeholder.svg",
+      "src": "/lovable-uploads/7ea14553-d4aa-410c-b9a7-e24d70cc057a.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/placeholder.svg", 
+      "src": "/lovable-uploads/7ea14553-d4aa-410c-b9a7-e24d70cc057a.png", 
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
@@ -29,7 +29,7 @@
       "short_name": "Tap",
       "description": "Jump right into the global tapping experience",
       "url": "/",
-      "icons": [{ "src": "/placeholder.svg", "sizes": "96x96" }]
+      "icons": [{ "src": "/lovable-uploads/7ea14553-d4aa-410c-b9a7-e24d70cc057a.png", "sizes": "96x96" }]
     }
   ]
 }

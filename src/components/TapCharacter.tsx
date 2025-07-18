@@ -10,9 +10,11 @@ interface TapCharacterProps {
 export function TapCharacter({ onTap, personalTaps }: TapCharacterProps) {
   const { settings } = useSettings();
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isMouthOpen, setIsMouthOpen] = useState(false);
 
   const handleTap = () => {
     setIsAnimating(true);
+    setIsMouthOpen(true);
     
     // Haptic feedback
     if (settings.vibrationEnabled && 'vibrate' in navigator) {
@@ -21,9 +23,6 @@ export function TapCharacter({ onTap, personalTaps }: TapCharacterProps) {
 
     // Sound feedback
     if (settings.soundEnabled) {
-      const audio = new Audio();
-      audio.volume = 0.3;
-      // Create a simple pop sound using Web Audio API
       const context = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = context.createOscillator();
       const gainNode = context.createGain();
@@ -43,45 +42,53 @@ export function TapCharacter({ onTap, personalTaps }: TapCharacterProps) {
 
     onTap();
     
-    setTimeout(() => setIsAnimating(false), 200);
+    setTimeout(() => {
+      setIsAnimating(false);
+      setIsMouthOpen(false);
+    }, 200);
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <div className="flex flex-col items-center space-y-6">
       <div 
         className={`
           relative cursor-pointer select-none transform transition-all duration-200 ease-out
-          ${isAnimating ? 'scale-110 rotate-2' : 'hover:scale-105'}
+          ${isAnimating ? 'scale-110' : 'hover:scale-105'}
           active:scale-95
         `}
         onClick={handleTap}
       >
         {/* Tap ripple effect */}
         {isAnimating && (
-          <div className="absolute inset-0 rounded-full bg-rose-400/30 animate-ping" />
+          <div className="absolute inset-0 rounded-full bg-rose-400/30 animate-ping scale-150" />
         )}
         
-        {/* Main character - cute cat */}
-        <div className="relative w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-orange-300 to-orange-400 rounded-full shadow-lg flex items-center justify-center">
-          {/* Cat face */}
-          <div className="text-6xl sm:text-7xl">🐱</div>
+        {/* BigMouthCat character */}
+        <div className="relative w-48 h-48 sm:w-56 sm:h-56">
+          <img 
+            src={isMouthOpen ? "/lovable-uploads/20f26be6-ed3d-4bd1-864d-10e906df4ff5.png" : "/lovable-uploads/7ea14553-d4aa-410c-b9a7-e24d70cc057a.png"}
+            alt="BigMouthCat"
+            className="w-full h-full object-contain drop-shadow-2xl"
+          />
           
           {/* Sparkles around the cat when tapping */}
           {isAnimating && (
             <>
-              <div className="absolute -top-2 -left-2 text-yellow-400 animate-bounce">✨</div>
-              <div className="absolute -top-2 -right-2 text-pink-400 animate-bounce delay-75">💫</div>
-              <div className="absolute -bottom-2 -left-2 text-blue-400 animate-bounce delay-150">⭐</div>
-              <div className="absolute -bottom-2 -right-2 text-green-400 animate-bounce delay-200">🌟</div>
+              <div className="absolute -top-4 -left-4 text-yellow-400 animate-bounce text-2xl">✨</div>
+              <div className="absolute -top-4 -right-4 text-pink-400 animate-bounce delay-75 text-2xl">💫</div>
+              <div className="absolute -bottom-4 -left-4 text-blue-400 animate-bounce delay-150 text-2xl">⭐</div>
+              <div className="absolute -bottom-4 -right-4 text-green-400 animate-bounce delay-200 text-2xl">🌟</div>
             </>
           )}
         </div>
       </div>
       
       {/* Personal tap counter */}
-      <div className="text-center">
-        <p className="text-sm text-muted-foreground">Your taps</p>
-        <p className="text-2xl font-bold text-primary">{personalTaps.toLocaleString()}</p>
+      <div className="text-center bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/30">
+        <p className="text-sm text-muted-foreground font-medium">Your taps</p>
+        <p className="text-3xl font-bold text-primary bg-gradient-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">
+          {personalTaps.toLocaleString()}
+        </p>
       </div>
     </div>
   );

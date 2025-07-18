@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
@@ -10,6 +10,9 @@ export function useGlobalTaps() {
     const stored = localStorage.getItem('personalTapCount');
     return stored ? parseInt(stored, 10) : 0;
   });
+
+  const pendingTapsRef = useRef(0);
+  const updateTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Fetch global tap count
   const { data: globalTaps, isLoading } = useQuery({
@@ -28,12 +31,12 @@ export function useGlobalTaps() {
 
   // Mutation to increment global taps
   const incrementMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (tapCount: number) => {
       const currentCount = globalTaps?.total_taps || 0;
       const { error } = await supabase
         .from('global_taps')
         .update({ 
-          total_taps: currentCount + 1,
+          total_taps: currentCount + tapCount,
           updated_at: new Date().toISOString()
         })
         .eq('id', globalTaps?.id);
@@ -42,8 +45,22 @@ export function useGlobalTaps() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['globalTaps'] });
+      pendingTapsRef.current = 0;
     },
   });
+
+  // Debounced update function
+  const debouncedUpdate = useCallback(() => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+
+    updateTimeoutRef.current = setTimeout(() => {
+      if (pendingTapsRef.current > 0) {
+        incrementMutation.mutate(pendingTapsRef.current);
+      }
+    }, 100); // 100ms debounce
+  }, [incrementMutation]);
 
   // Listen for real-time updates
   useEffect(() => {
@@ -68,14 +85,24 @@ export function useGlobalTaps() {
   }, [queryClient]);
 
   const handleTap = async () => {
-    // Increment personal counter
+    // Increment personal counter immediately
     const newPersonalCount = personalTaps + 1;
     setPersonalTaps(newPersonalCount);
     localStorage.setItem('personalTapCount', newPersonalCount.toString());
 
-    // Increment global counter
-    incrementMutation.mutate();
+    // Queue the global tap update
+    pendingTapsRef.current += 1;
+    debouncedUpdate();
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return {
     globalTaps: globalTaps?.total_taps || 0,

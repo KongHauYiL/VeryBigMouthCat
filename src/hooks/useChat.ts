@@ -10,22 +10,32 @@ export function useChat() {
   const [lastMessageTime, setLastMessageTime] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const RATE_LIMIT_MS = 5000; // 5 seconds between messages
+  const RATE_LIMIT_MS = 3000; // 3 seconds between messages
+  const MESSAGE_EXPIRE_MS = 5 * 60 * 1000; // 5 minutes
 
-  // Fetch messages
+  // Fetch messages (only from last 5 minutes)
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['messages'],
     queryFn: async () => {
+      const fiveMinutesAgo = new Date(Date.now() - MESSAGE_EXPIRE_MS).toISOString();
       const { data, error } = await supabase
         .from('messages')
         .select('*')
+        .gte('created_at', fiveMinutesAgo)
         .order('created_at', { ascending: true })
         .limit(50);
       
       if (error) throw error;
       return data;
     },
+    refetchInterval: 10000, // Refetch every 10 seconds to clean up expired messages
   });
+
+  // Validate username
+  const validateUsername = (username: string): boolean => {
+    const lowerUsername = username.toLowerCase();
+    return !lowerUsername.includes('server');
+  };
 
   // Send message mutation
   const sendMessageMutation = useMutation({
@@ -33,6 +43,10 @@ export function useChat() {
       const now = Date.now();
       if (now - lastMessageTime < RATE_LIMIT_MS) {
         throw new Error(`Please wait ${Math.ceil((RATE_LIMIT_MS - (now - lastMessageTime)) / 1000)} seconds before sending another message`);
+      }
+
+      if (!validateUsername(username)) {
+        throw new Error('Username cannot contain "server"');
       }
 
       const { error } = await supabase
@@ -95,5 +109,6 @@ export function useChat() {
     error: sendMessageMutation.error,
     canSendMessage,
     getTimeUntilNextMessage,
+    validateUsername,
   };
 }
