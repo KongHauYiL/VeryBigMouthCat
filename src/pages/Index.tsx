@@ -13,7 +13,8 @@ const Index = () => {
   const {
     globalTaps,
     handleTap,
-    isLoading
+    isLoading,
+    error
   } = useGlobalTaps();
   const {
     settings
@@ -52,6 +53,19 @@ const Index = () => {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
+
+  // Show error state if there's a critical error
+  if (error) {
+    console.error('Critical error in Index component:', error);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-950/20 via-rose-950/20 to-pink-950/20 flex items-center justify-center">
+        <div className="text-center text-white">
+          <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
+          <p className="text-muted-foreground mb-4">Please refresh the page to try again</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-950/20 via-rose-950/20 to-pink-950/20 relative overflow-hidden">

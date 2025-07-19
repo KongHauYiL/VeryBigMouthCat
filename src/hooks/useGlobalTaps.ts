@@ -14,23 +14,31 @@ export function useGlobalTaps() {
   const isProcessingRef = useRef(false);
 
   // Fetch global tap count
-  const { data: globalTaps, isLoading } = useQuery({
+  const { data: globalTaps, isLoading, error } = useQuery({
     queryKey: ['globalTaps'],
     queryFn: async () => {
+      console.log('Fetching global taps...');
       const { data, error } = await supabase
         .from('global_taps')
         .select('*')
         .limit(1)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching global taps:', error);
+        throw error;
+      }
+      console.log('Global taps data:', data);
       return data;
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 
   // Improved mutation to handle batch updates
   const incrementMutation = useMutation({
     mutationFn: async (tapCount: number) => {
+      console.log('Updating global taps by:', tapCount);
       const currentCount = globalTaps?.total_taps || 0;
       const { error } = await supabase
         .from('global_taps')
@@ -40,7 +48,11 @@ export function useGlobalTaps() {
         })
         .eq('id', globalTaps?.id);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating global taps:', error);
+        throw error;
+      }
+      console.log('Successfully updated global taps');
       return tapCount;
     },
     onSuccess: () => {
@@ -56,7 +68,7 @@ export function useGlobalTaps() {
 
   // Process pending taps in batches
   const processPendingTaps = useCallback(async () => {
-    if (isProcessingRef.current || pendingTapsRef.current === 0) return;
+    if (isProcessingRef.current || pendingTapsRef.current === 0 || !globalTaps) return;
     
     isProcessingRef.current = true;
     const tapsToProcess = pendingTapsRef.current;
@@ -74,18 +86,18 @@ export function useGlobalTaps() {
         setTimeout(processPendingTaps, 100);
       }
     }
-  }, [incrementMutation]);
+  }, [incrementMutation, globalTaps]);
 
   // Debounced batch processing
   useEffect(() => {
     const interval = setInterval(() => {
-      if (pendingTapsRef.current > 0) {
+      if (pendingTapsRef.current > 0 && globalTaps) {
         processPendingTaps();
       }
     }, 200); // Process every 200ms
 
     return () => clearInterval(interval);
-  }, [processPendingTaps]);
+  }, [processPendingTaps, globalTaps]);
 
   // Listen for real-time updates
   useEffect(() => {
@@ -110,6 +122,7 @@ export function useGlobalTaps() {
   }, [queryClient]);
 
   const handleTap = async () => {
+    console.log('Tap registered!');
     // Increment personal counter immediately
     const newPersonalCount = personalTaps + 1;
     setPersonalTaps(newPersonalCount);
@@ -130,10 +143,12 @@ export function useGlobalTaps() {
     });
   };
 
+  // Return safe values even if there's an error
   return {
     globalTaps: globalTaps?.total_taps || 0,
     personalTaps,
     isLoading,
+    error,
     handleTap,
   };
 }
