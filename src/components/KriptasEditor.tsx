@@ -107,7 +107,7 @@ LOOP 5 {
           <li><code>TAP_COUNT n</code> - Set number of taps to execute</li>
           <li><code>TAP_EXECUTE</code> - Execute a single tap</li>
           <li><code>WAIT ms</code> - Wait for specified milliseconds</li>
-          <li><code>LOOP n {{ ... }}</code> - Repeat commands n times</li>
+          <li><code>LOOP n {'{ ... }'}</code> - Repeat commands n times</li>
         </ul>
       </div>
 
