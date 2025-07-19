@@ -83,16 +83,49 @@ const Index = () => {
       />
 
       {/* Main Content */}
-      <div className="pt-20 pb-8 px-4 flex flex-col items-center justify-center min-h-screen space-y-8">
+      <div className="pt-20 pb-32 px-4 flex flex-col items-center justify-center min-h-screen">
         {/* Tap Character */}
         <TapCharacter onTap={handleTap} />
+      </div>
 
-        {/* Global Taps Card */}
-        <div className="text-center text-muted-foreground max-w-md bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/30">
-          <p className="text-sm text-muted-foreground font-medium mb-2">Global taps</p>
-          <p className="text-4xl font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">
-            {isLoading ? <span className="animate-pulse">---.---</span> : globalTaps.toLocaleString()}
-          </p>
+      {/* Bottom Global Taps Card */}
+      <div className="fixed bottom-0 left-0 right-0 z-10">
+        <div className="relative">
+          {/* Gradient backdrop */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent h-32 -top-16"></div>
+          
+          {/* Main card */}
+          <div className="relative bg-gradient-to-r from-rose-600/90 to-orange-600/90 backdrop-blur-xl border-t border-white/20 shadow-2xl">
+            <div className="px-6 py-8 text-center">
+              <div className="mb-2">
+                <p className="text-white/80 text-sm font-medium tracking-wide uppercase">
+                  Global Taps
+                </p>
+              </div>
+              <div className="mb-1">
+                <p className="text-5xl font-bold text-white drop-shadow-lg">
+                  {isLoading ? (
+                    <span className="animate-pulse">---.---</span>
+                  ) : (
+                    globalTaps.toLocaleString()
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+                <p className="text-white/70 text-xs font-medium">
+                  Live Global Count
+                </p>
+                <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+            
+            {/* Decorative elements */}
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-1 bg-white/30 rounded-full"></div>
+            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full shadow-lg flex items-center justify-center">
+              <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+            </div>
+          </div>
         </div>
       </div>
 
