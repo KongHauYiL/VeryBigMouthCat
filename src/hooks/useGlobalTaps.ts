@@ -10,6 +10,9 @@ export function useGlobalTaps() {
     return stored ? parseInt(stored, 10) : 0;
   });
 
+  const pendingTapsRef = useRef(0);
+  const isProcessingRef = useRef(false);
+
   // Fetch global tap count
   const { data: globalTaps, isLoading } = useQuery({
     queryKey: ['globalTaps'],
@@ -25,24 +28,64 @@ export function useGlobalTaps() {
     },
   });
 
-  // Mutation to increment global taps - immediate, no debouncing
+  // Improved mutation to handle batch updates
   const incrementMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (tapCount: number) => {
       const currentCount = globalTaps?.total_taps || 0;
       const { error } = await supabase
         .from('global_taps')
         .update({ 
-          total_taps: currentCount + 1,
+          total_taps: currentCount + tapCount,
           updated_at: new Date().toISOString()
         })
         .eq('id', globalTaps?.id);
       
       if (error) throw error;
+      return tapCount;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['globalTaps'] });
     },
+    onError: (error) => {
+      console.error('Failed to update global taps:', error);
+      // Retry mechanism - add failed taps back to pending
+      pendingTapsRef.current += 1;
+      processPendingTaps();
+    }
   });
+
+  // Process pending taps in batches
+  const processPendingTaps = useCallback(async () => {
+    if (isProcessingRef.current || pendingTapsRef.current === 0) return;
+    
+    isProcessingRef.current = true;
+    const tapsToProcess = pendingTapsRef.current;
+    pendingTapsRef.current = 0;
+    
+    try {
+      await incrementMutation.mutateAsync(tapsToProcess);
+    } catch (error) {
+      console.error('Batch update failed:', error);
+    } finally {
+      isProcessingRef.current = false;
+      
+      // Process any taps that accumulated during this batch
+      if (pendingTapsRef.current > 0) {
+        setTimeout(processPendingTaps, 100);
+      }
+    }
+  }, [incrementMutation]);
+
+  // Debounced batch processing
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (pendingTapsRef.current > 0) {
+        processPendingTaps();
+      }
+    }, 200); // Process every 200ms
+
+    return () => clearInterval(interval);
+  }, [processPendingTaps]);
 
   // Listen for real-time updates
   useEffect(() => {
@@ -72,8 +115,19 @@ export function useGlobalTaps() {
     setPersonalTaps(newPersonalCount);
     localStorage.setItem('personalTapCount', newPersonalCount.toString());
 
-    // Immediately update global counter
-    incrementMutation.mutate();
+    // Add to pending taps for batch processing
+    pendingTapsRef.current += 1;
+    
+    // Optimistically update the UI immediately
+    queryClient.setQueryData(['globalTaps'], (oldData: any) => {
+      if (oldData) {
+        return {
+          ...oldData,
+          total_taps: oldData.total_taps + 1
+        };
+      }
+      return oldData;
+    });
   };
 
   return {
