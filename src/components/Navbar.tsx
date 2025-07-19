@@ -16,9 +16,7 @@ export function Navbar({
         {/* Logo and Name */}
         <div className="flex items-center space-x-3">
           <img src="/lovable-uploads/7ea14553-d4aa-410c-b9a7-e24d70cc057a.png" alt="BigMouthCat Icon" className="w-8 h-8 object-contain" />
-          <h1 className="text-xl font-bold bg-gradient-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">
-            BigMouthCat
-          </h1>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">BigMouthCat</h1>
         </div>
 
         {/* Global Taps Counter */}
