@@ -75,20 +75,19 @@ LOOP 5 {
             <Download className="h-4 w-4 mr-1" />
             Download
           </Button>
-          <label className="cursor-pointer">
-            <Button variant="outline" size="sm" asChild>
-              <span>
-                <Upload className="h-4 w-4 mr-1" />
-                Upload
-              </span>
+          <div className="relative">
+            <Button variant="outline" size="sm" onClick={() => document.getElementById('file-upload')?.click()}>
+              <Upload className="h-4 w-4 mr-1" />
+              Upload
             </Button>
             <input
+              id="file-upload"
               type="file"
               accept=".krp,.txt"
               onChange={handleUpload}
               className="hidden"
             />
-          </label>
+          </div>
         </div>
       </div>
 
