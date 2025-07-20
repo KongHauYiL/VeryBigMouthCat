@@ -2,23 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import { TapCharacter } from '@/components/TapCharacter';
 import { Navbar } from '@/components/Navbar';
-import { ChatBox } from '@/components/ChatBox';
 import { SettingsPanel } from '@/components/SettingsPanel';
+import { AuthModal } from '@/components/AuthModal';
 import { useGlobalTaps } from '@/hooks/useGlobalTaps';
-import { useSettings } from '@/hooks/useSettings';
+import { useUserTaps } from '@/hooks/useUserTaps';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const {
-    globalTaps,
-    handleTap,
-    isLoading,
-    error
-  } = useGlobalTaps();
-  const {
-    settings
-  } = useSettings();
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const { user, isLoading: authLoading } = useAuth();
+  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps();
+  const { personalTaps, handleTap: handleUserTap } = useUserTaps();
 
   // Apply dark mode (always enabled)
   useEffect(() => {
@@ -32,7 +27,6 @@ const Index = () => {
       e.preventDefault();
       deferredPrompt = e;
 
-      // Show install prompt after a short delay
       setTimeout(() => {
         if (deferredPrompt && !localStorage.getItem('pwa-dismissed')) {
           const shouldInstall = confirm('Install BigMouthCat as an app for the best experience?');
@@ -54,14 +48,19 @@ const Index = () => {
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
-  // Show error state if there's a critical error
-  if (error) {
-    console.error('Critical error in Index component:', error);
+  const handleTap = () => {
+    handleGlobalTap();
+    if (user) {
+      handleUserTap();
+    }
+  };
+
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-950/20 via-rose-950/20 to-pink-950/20 flex items-center justify-center">
         <div className="text-center text-white">
-          <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
-          <p className="text-muted-foreground mb-4">Please refresh the page to try again</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-xl">Loading...</p>
         </div>
       </div>
     );
@@ -78,13 +77,15 @@ const Index = () => {
       {/* Navbar */}
       <Navbar 
         globalTaps={globalTaps} 
+        personalTaps={personalTaps}
+        user={user}
         isLoading={isLoading} 
-        onSettingsToggle={() => setIsSettingsOpen(!isSettingsOpen)} 
+        onSettingsToggle={() => setIsSettingsOpen(!isSettingsOpen)}
+        onAuthToggle={() => setIsAuthOpen(!isAuthOpen)}
       />
 
       {/* Main Content */}
       <div className="pt-20 pb-32 px-4 flex flex-col items-center justify-center min-h-screen">
-        {/* Tap Character */}
         <TapCharacter onTap={handleTap} />
       </div>
 
@@ -96,22 +97,31 @@ const Index = () => {
           
           {/* Main card */}
           <div className="relative bg-gradient-to-r from-rose-600/90 to-orange-600/90 backdrop-blur-xl border-t border-white/20 shadow-2xl">
-            <div className="px-6 py-8 text-center">
-              <div className="mb-2">
-                <p className="text-white/80 text-sm font-medium tracking-wide uppercase">
-                  Global Taps
-                </p>
+            <div className="px-6 py-6 text-center">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-white/80 text-xs font-medium tracking-wide uppercase mb-1">
+                    Global Taps
+                  </p>
+                  <p className="text-3xl font-bold text-white drop-shadow-lg">
+                    {isLoading ? (
+                      <span className="animate-pulse">---.---</span>
+                    ) : (
+                      globalTaps.toLocaleString()
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-white/80 text-xs font-medium tracking-wide uppercase mb-1">
+                    {user ? 'Your Taps' : 'Personal Taps'}
+                  </p>
+                  <p className="text-3xl font-bold text-white drop-shadow-lg">
+                    {personalTaps.toLocaleString()}
+                  </p>
+                </div>
               </div>
-              <div className="mb-1">
-                <p className="text-5xl font-bold text-white drop-shadow-lg">
-                  {isLoading ? (
-                    <span className="animate-pulse">---.---</span>
-                  ) : (
-                    globalTaps.toLocaleString()
-                  )}
-                </p>
-              </div>
-              <div className="flex items-center justify-center space-x-2">
+              
+              <div className="flex items-center justify-center space-x-2 mt-2">
                 <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
                 <p className="text-white/70 text-xs font-medium">
                   Live Global Count
@@ -129,11 +139,11 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Chat Box */}
-      <ChatBox isOpen={isChatOpen} onToggle={() => setIsChatOpen(!isChatOpen)} />
-
       {/* Settings Panel */}
       <SettingsPanel isOpen={isSettingsOpen} onToggle={() => setIsSettingsOpen(!isSettingsOpen)} />
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </div>
   );
 };
