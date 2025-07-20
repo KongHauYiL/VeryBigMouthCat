@@ -69,6 +69,3 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.party_members;
 DROP TABLE IF EXISTS public.user_taps CASCADE;
 DROP TABLE IF EXISTS public.user_sessions CASCADE;
 DROP TABLE IF EXISTS public.users CASCADE;
-
--- Add unique constraint for party_members to fix the ON CONFLICT error
-ALTER TABLE public.party_members ADD CONSTRAINT party_members_room_username_unique UNIQUE (room_id, username);
