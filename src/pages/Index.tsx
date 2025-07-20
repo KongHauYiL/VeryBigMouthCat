@@ -3,17 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { TapCharacter } from '@/components/TapCharacter';
 import { Navbar } from '@/components/Navbar';
 import { SettingsPanel } from '@/components/SettingsPanel';
-import { AuthModal } from '@/components/AuthModal';
+import { PartyRoomModal } from '@/components/PartyRoomModal';
 import { useGlobalTaps } from '@/hooks/useGlobalTaps';
-import { useUserTaps } from '@/hooks/useUserTaps';
-import { useAuth } from '@/hooks/useAuth';
+import { usePartyRoom } from '@/hooks/usePartyRoom';
 
 const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const { user, isLoading: authLoading } = useAuth();
-  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps();
-  const { personalTaps, handleTap: handleUserTap } = useUserTaps();
+  const [isPartyOpen, setIsPartyOpen] = useState(false);
+  
+  const { currentRoom, updateLastActive } = usePartyRoom();
+  const partyMultiplier = currentRoom?.multiplier || 1;
+  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(partyMultiplier);
 
   // Apply dark mode (always enabled)
   useEffect(() => {
@@ -50,21 +50,10 @@ const Index = () => {
 
   const handleTap = () => {
     handleGlobalTap();
-    if (user) {
-      handleUserTap();
+    if (currentRoom) {
+      updateLastActive();
     }
   };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-950/20 via-rose-950/20 to-pink-950/20 flex items-center justify-center">
-        <div className="text-center text-white">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto mb-4"></div>
-          <p className="text-xl">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-950/20 via-rose-950/20 to-pink-950/20 relative overflow-hidden">
@@ -72,21 +61,23 @@ const Index = () => {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-rose-300/20 to-orange-300/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-pink-300/20 to-rose-300/20 rounded-full blur-3xl"></div>
+        {currentRoom && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-green-300/10 to-emerald-300/10 rounded-full blur-3xl animate-pulse"></div>
+        )}
       </div>
 
       {/* Navbar */}
       <Navbar 
         globalTaps={globalTaps} 
-        personalTaps={personalTaps}
-        user={user}
         isLoading={isLoading} 
         onSettingsToggle={() => setIsSettingsOpen(!isSettingsOpen)}
-        onAuthToggle={() => setIsAuthOpen(!isAuthOpen)}
+        onPartyToggle={() => setIsPartyOpen(!isPartyOpen)}
+        partyMultiplier={partyMultiplier}
       />
 
       {/* Main Content */}
       <div className="pt-20 pb-32 px-4 flex flex-col items-center justify-center min-h-screen">
-        <TapCharacter onTap={handleTap} />
+        <TapCharacter onTap={handleTap} partyMultiplier={partyMultiplier} />
       </div>
 
       {/* Bottom Global Taps Card */}
@@ -96,12 +87,16 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent h-32 -top-16"></div>
           
           {/* Main card */}
-          <div className="relative bg-gradient-to-r from-rose-600/90 to-orange-600/90 backdrop-blur-xl border-t border-white/20 shadow-2xl">
+          <div className={`relative backdrop-blur-xl border-t shadow-2xl ${
+            currentRoom 
+              ? 'bg-gradient-to-r from-green-600/90 to-emerald-600/90 border-green-400/20' 
+              : 'bg-gradient-to-r from-rose-600/90 to-orange-600/90 border-white/20'
+          }`}>
             <div className="px-6 py-6 text-center">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex justify-center">
                 <div>
                   <p className="text-white/80 text-xs font-medium tracking-wide uppercase mb-1">
-                    Global Taps
+                    Global Taps {currentRoom && `(${partyMultiplier}x Multiplier)`}
                   </p>
                   <p className="text-3xl font-bold text-white drop-shadow-lg">
                     {isLoading ? (
@@ -111,15 +106,18 @@ const Index = () => {
                     )}
                   </p>
                 </div>
-                <div>
-                  <p className="text-white/80 text-xs font-medium tracking-wide uppercase mb-1">
-                    {user ? 'Your Taps' : 'Personal Taps'}
+              </div>
+              
+              {currentRoom && (
+                <div className="mt-3 bg-white/20 rounded-lg px-3 py-2">
+                  <p className="text-white text-sm font-medium">
+                    🎉 Party Room: {currentRoom.name}
                   </p>
-                  <p className="text-3xl font-bold text-white drop-shadow-lg">
-                    {personalTaps.toLocaleString()}
+                  <p className="text-white/80 text-xs">
+                    Code: {currentRoom.room_code}
                   </p>
                 </div>
-              </div>
+              )}
               
               <div className="flex items-center justify-center space-x-2 mt-2">
                 <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
@@ -132,7 +130,11 @@ const Index = () => {
             
             {/* Decorative elements */}
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-1 bg-white/30 rounded-full"></div>
-            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full shadow-lg flex items-center justify-center">
+            <div className={`absolute -top-2 left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full shadow-lg flex items-center justify-center ${
+              currentRoom 
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                : 'bg-gradient-to-r from-rose-500 to-orange-500'
+            }`}>
               <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
             </div>
           </div>
@@ -142,8 +144,8 @@ const Index = () => {
       {/* Settings Panel */}
       <SettingsPanel isOpen={isSettingsOpen} onToggle={() => setIsSettingsOpen(!isSettingsOpen)} />
 
-      {/* Auth Modal */}
-      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      {/* Party Room Modal */}
+      <PartyRoomModal isOpen={isPartyOpen} onClose={() => setIsPartyOpen(false)} />
     </div>
   );
 };

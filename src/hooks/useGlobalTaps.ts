@@ -3,13 +3,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export function useGlobalTaps() {
+export function useGlobalTaps(partyMultiplier = 1) {
   const queryClient = useQueryClient();
-  const [personalTaps, setPersonalTaps] = useState(() => {
-    const stored = localStorage.getItem('personalTapCount');
-    return stored ? parseInt(stored, 10) : 0;
-  });
-
   const pendingTapsRef = useRef(0);
   const isProcessingRef = useRef(false);
 
@@ -35,15 +30,16 @@ export function useGlobalTaps() {
     retryDelay: 1000,
   });
 
-  // Improved mutation to handle batch updates
+  // Improved mutation to handle batch updates with multiplier
   const incrementMutation = useMutation({
     mutationFn: async (tapCount: number) => {
-      console.log('Updating global taps by:', tapCount);
+      console.log('Updating global taps by:', tapCount, 'with multiplier:', partyMultiplier);
+      const effectiveTaps = tapCount * partyMultiplier;
       const currentCount = globalTaps?.total_taps || 0;
       const { error } = await supabase
         .from('global_taps')
         .update({ 
-          total_taps: currentCount + tapCount,
+          total_taps: currentCount + effectiveTaps,
           updated_at: new Date().toISOString()
         })
         .eq('id', globalTaps?.id);
@@ -53,7 +49,7 @@ export function useGlobalTaps() {
         throw error;
       }
       console.log('Successfully updated global taps');
-      return tapCount;
+      return effectiveTaps;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['globalTaps'] });
@@ -122,21 +118,17 @@ export function useGlobalTaps() {
   }, [queryClient]);
 
   const handleTap = async () => {
-    console.log('Tap registered!');
-    // Increment personal counter immediately
-    const newPersonalCount = personalTaps + 1;
-    setPersonalTaps(newPersonalCount);
-    localStorage.setItem('personalTapCount', newPersonalCount.toString());
-
+    console.log('Tap registered with multiplier:', partyMultiplier);
+    
     // Add to pending taps for batch processing
     pendingTapsRef.current += 1;
     
-    // Optimistically update the UI immediately
+    // Optimistically update the UI immediately with multiplier
     queryClient.setQueryData(['globalTaps'], (oldData: any) => {
       if (oldData) {
         return {
           ...oldData,
-          total_taps: oldData.total_taps + 1
+          total_taps: oldData.total_taps + partyMultiplier
         };
       }
       return oldData;
@@ -146,7 +138,6 @@ export function useGlobalTaps() {
   // Return safe values even if there's an error
   return {
     globalTaps: globalTaps?.total_taps || 0,
-    personalTaps,
     isLoading,
     error,
     handleTap,

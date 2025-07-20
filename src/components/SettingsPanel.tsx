@@ -1,11 +1,10 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useSettings } from '@/hooks/useSettings';
-import { X, RotateCcw } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -13,7 +12,7 @@ interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
-  const { settings, updateSettings, resetPersonalCounter } = useSettings();
+  const { settings, updateSettings } = useSettings();
 
   if (!isOpen) return null;
 
@@ -52,25 +51,6 @@ export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
             />
           </div>
 
-          {/* Reset Personal Counter */}
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-            <div className="flex items-center justify-between mb-2">
-              <Label className="text-sm font-medium">Reset Personal Counter</Label>
-              <Button
-                onClick={resetPersonalCounter}
-                variant="outline"
-                size="sm"
-                className="bg-red-500/20 border-red-500/30 hover:bg-red-500/30 text-red-200"
-              >
-                <RotateCcw className="h-4 w-4 mr-1" />
-                Reset
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              This will reset your personal tap counter to zero
-            </p>
-          </div>
-
           {/* Character Info */}
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
             <h3 className="text-sm font-medium mb-3">Special Cat Modes</h3>
@@ -88,6 +68,24 @@ export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
                 <span>Bored: {'<'} 1 click per second for 5+ seconds</span>
               </div>
             </div>
+          </div>
+
+          {/* Party Room Info */}
+          <div className="bg-green-500/20 border border-green-500/30 rounded-xl p-4">
+            <h3 className="text-sm font-medium mb-2 text-green-200">🎉 Party Rooms</h3>
+            <p className="text-xs text-green-200/80">
+              Create or join party rooms with friends to get 2x multiplier on all clicks! 
+              Perfect for coordinated tapping sessions.
+            </p>
+          </div>
+
+          {/* Game Info */}
+          <div className="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4">
+            <h3 className="text-sm font-medium mb-2 text-blue-200">About BigMouthCat</h3>
+            <p className="text-xs text-blue-200/80">
+              A global tapping experience where every click connects you with players worldwide. 
+              Watch the cat react to your clicking patterns!
+            </p>
           </div>
         </div>
       </div>

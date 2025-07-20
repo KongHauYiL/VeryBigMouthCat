@@ -53,91 +53,65 @@ export type Database = {
         }
         Relationships: []
       }
-      user_sessions: {
+      party_members: {
+        Row: {
+          id: string
+          joined_at: string
+          last_active: string
+          room_id: string | null
+          username: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          last_active?: string
+          room_id?: string | null
+          username: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          last_active?: string
+          room_id?: string | null
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_members_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "party_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      party_rooms: {
         Row: {
           created_at: string
           expires_at: string
           id: string
-          session_token: string
-          user_id: string | null
+          is_active: boolean
+          multiplier: number
+          name: string
+          room_code: string
         }
         Insert: {
           created_at?: string
-          expires_at: string
+          expires_at?: string
           id?: string
-          session_token: string
-          user_id?: string | null
+          is_active?: boolean
+          multiplier?: number
+          name: string
+          room_code: string
         }
         Update: {
           created_at?: string
           expires_at?: string
           id?: string
-          session_token?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_sessions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_taps: {
-        Row: {
-          id: string
-          last_tap_at: string | null
-          taps_count: number
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          id?: string
-          last_tap_at?: string | null
-          taps_count?: number
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          id?: string
-          last_tap_at?: string | null
-          taps_count?: number
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_taps_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      users: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          last_active: string | null
-          username: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          last_active?: string | null
-          username: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          last_active?: string | null
-          username?: string
+          is_active?: boolean
+          multiplier?: number
+          name?: string
+          room_code?: string
         }
         Relationships: []
       }

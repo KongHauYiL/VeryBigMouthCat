@@ -1,28 +1,23 @@
 
 import React from 'react';
-import { Settings, User, LogOut } from 'lucide-react';
+import { Settings, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
 
 interface NavbarProps {
   globalTaps: number;
-  personalTaps: number;
-  user: any;
   isLoading: boolean;
   onSettingsToggle: () => void;
-  onAuthToggle: () => void;
+  onPartyToggle: () => void;
+  partyMultiplier?: number;
 }
 
 export function Navbar({
   globalTaps,
-  personalTaps,
-  user,
   isLoading,
   onSettingsToggle,
-  onAuthToggle
+  onPartyToggle,
+  partyMultiplier = 1
 }: NavbarProps) {
-  const { signOut } = useAuth();
-
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-lg">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -38,14 +33,29 @@ export function Navbar({
           </h1>
         </div>
 
-        {/* User info and controls */}
+        {/* Controls */}
         <div className="flex items-center space-x-3">
-          {user && (
-            <div className="hidden sm:flex items-center space-x-2 bg-white/10 backdrop-blur-md rounded-xl px-3 py-2 border border-white/20">
-              <User className="h-4 w-4 text-rose-400" />
-              <span className="text-sm font-medium text-white">{user.username}</span>
+          {/* Party multiplier indicator */}
+          {partyMultiplier > 1 && (
+            <div className="hidden sm:flex items-center space-x-2 bg-green-500/20 backdrop-blur-md rounded-xl px-3 py-2 border border-green-500/30">
+              <Users className="h-4 w-4 text-green-400" />
+              <span className="text-sm font-medium text-green-400">{partyMultiplier}x Party!</span>
             </div>
           )}
+
+          {/* Party Room Button */}
+          <Button 
+            onClick={onPartyToggle} 
+            variant="ghost" 
+            size="icon" 
+            className={`backdrop-blur-md border rounded-xl h-10 w-10 ${
+              partyMultiplier > 1 
+                ? 'bg-green-500/20 border-green-500/30 hover:bg-green-500/30' 
+                : 'bg-white/20 border-white/30 hover:bg-white/30'
+            }`}
+          >
+            <Users className="h-4 w-4" />
+          </Button>
 
           {/* Settings Button */}
           <Button 
@@ -56,25 +66,6 @@ export function Navbar({
           >
             <Settings className="h-4 w-4" />
           </Button>
-
-          {/* Auth Button */}
-          {user ? (
-            <Button 
-              onClick={signOut} 
-              variant="ghost" 
-              size="icon" 
-              className="bg-white/20 backdrop-blur-md border border-white/30 hover:bg-white/30 rounded-xl h-10 w-10"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          ) : (
-            <Button 
-              onClick={onAuthToggle} 
-              className="bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white px-4 py-2 rounded-xl text-sm font-medium"
-            >
-              Sign In
-            </Button>
-          )}
         </div>
       </div>
     </nav>

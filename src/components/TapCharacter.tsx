@@ -6,9 +6,10 @@ import { useTimeOfDay } from '@/hooks/useTimeOfDay';
 
 interface TapCharacterProps {
   onTap: () => void;
+  partyMultiplier?: number;
 }
 
-export function TapCharacter({ onTap }: TapCharacterProps) {
+export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) {
   const { settings } = useSettings();
   const [isAnimating, setIsAnimating] = useState(false);
   const [isMouthOpen, setIsMouthOpen] = useState(false);
@@ -20,14 +21,14 @@ export function TapCharacter({ onTap }: TapCharacterProps) {
     if (isFastClicking) {
       return "/lovable-uploads/laser-eyes-cat.png"; // Laser eyes for > 7 CPS
     }
-    if (isNightTime) {
+    if (isNightTime && !isFastClicking) {
       return "/lovable-uploads/sleepy-cat.png"; // Sleepy at night
     }
-    if (isSlowClicking) {
+    if (isSlowClicking && !isFastClicking && !isNightTime) {
       return "/lovable-uploads/bored-cat.png"; // Bored for < 1 CPS for 5+ seconds
     }
     
-    // Normal states
+    // Normal states - mouth open/closed
     return isMouthOpen 
       ? "/lovable-uploads/20f26be6-ed3d-4bd1-864d-10e906df4ff5.png" 
       : "/lovable-uploads/7ea14553-d4aa-410c-b9a7-e24d70cc057a.png";
@@ -45,21 +46,25 @@ export function TapCharacter({ onTap }: TapCharacterProps) {
 
     // Sound feedback
     if (settings.soundEnabled) {
-      const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = context.createOscillator();
-      const gainNode = context.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(context.destination);
-      
-      oscillator.frequency.setValueAtTime(800, context.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(200, context.currentTime + 0.1);
-      
-      gainNode.gain.setValueAtTime(0.3, context.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.1);
-      
-      oscillator.start(context.currentTime);
-      oscillator.stop(context.currentTime + 0.1);
+      try {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = context.createOscillator();
+        const gainNode = context.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(context.destination);
+        
+        oscillator.frequency.setValueAtTime(800, context.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, context.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.3, context.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.1);
+        
+        oscillator.start(context.currentTime);
+        oscillator.stop(context.currentTime + 0.1);
+      } catch (error) {
+        console.log('Audio not supported or blocked');
+      }
     }
 
     onTap();
@@ -85,12 +90,17 @@ export function TapCharacter({ onTap }: TapCharacterProps) {
           <div className="absolute inset-0 rounded-full bg-rose-400/30 animate-ping scale-150" />
         )}
         
+        {/* Party multiplier effect */}
+        {partyMultiplier > 1 && isAnimating && (
+          <div className="absolute inset-0 rounded-full bg-green-400/30 animate-ping scale-175" />
+        )}
+        
         {/* Special effects for laser eyes */}
         {isFastClicking && (
           <>
             <div className="absolute inset-0 rounded-full bg-red-500/20 animate-pulse scale-125" />
-            <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-8 bg-red-500 opacity-70 animate-pulse blur-sm"></div>
-            <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ml-4 w-2 h-8 bg-red-500 opacity-70 animate-pulse blur-sm"></div>
+            <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -ml-2 w-2 h-8 bg-red-500 opacity-70 animate-pulse blur-sm"></div>
+            <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ml-2 w-2 h-8 bg-red-500 opacity-70 animate-pulse blur-sm"></div>
           </>
         )}
         
@@ -100,6 +110,12 @@ export function TapCharacter({ onTap }: TapCharacterProps) {
             src={getCharacterImage()}
             alt="BigMouthCat"
             className="w-full h-full object-contain drop-shadow-2xl"
+            onError={(e) => {
+              // Fallback to default image if special images don't load
+              e.currentTarget.src = isMouthOpen 
+                ? "/lovable-uploads/20f26be6-ed3d-4bd1-864d-10e906df4ff5.png" 
+                : "/lovable-uploads/7ea14553-d4aa-410c-b9a7-e24d70cc057a.png";
+            }}
           />
           
           {/* Sparkles around the cat when tapping */}
@@ -109,13 +125,18 @@ export function TapCharacter({ onTap }: TapCharacterProps) {
               <div className="absolute -top-4 -right-4 text-pink-400 animate-bounce delay-75 text-2xl">💫</div>
               <div className="absolute -bottom-4 -left-4 text-blue-400 animate-bounce delay-150 text-2xl">⭐</div>
               <div className="absolute -bottom-4 -right-4 text-green-400 animate-bounce delay-200 text-2xl">🌟</div>
+              {partyMultiplier > 1 && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-green-400 animate-bounce text-3xl font-bold">
+                  {partyMultiplier}x
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
       
       {/* Character state indicator */}
-      <div className="text-center">
+      <div className="text-center space-y-1">
         {isFastClicking && (
           <p className="text-red-400 font-bold text-sm animate-pulse">🔥 LASER MODE! 🔥</p>
         )}
@@ -124,6 +145,11 @@ export function TapCharacter({ onTap }: TapCharacterProps) {
         )}
         {isSlowClicking && !isFastClicking && !isNightTime && (
           <p className="text-gray-400 text-sm">😑 Bored...</p>
+        )}
+        {partyMultiplier > 1 && (
+          <p className="text-green-400 font-bold text-sm animate-pulse">
+            🎉 Party Mode: {partyMultiplier}x Multiplier!
+          </p>
         )}
       </div>
     </div>
