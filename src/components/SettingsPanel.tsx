@@ -77,7 +77,7 @@ export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
             <div className="space-y-2 text-xs text-muted-foreground">
               <div className="flex items-center space-x-2">
                 <span>🔥</span>
-                <span>Laser Eyes: > 7 clicks per second</span>
+                <span>Laser Eyes: {'>'} 7 clicks per second</span>
               </div>
               <div className="flex items-center space-x-2">
                 <span>😴</span>
@@ -85,7 +85,7 @@ export function SettingsPanel({ isOpen, onToggle }: SettingsPanelProps) {
               </div>
               <div className="flex items-center space-x-2">
                 <span>😑</span>
-                <span>Bored: < 1 click per second for 5+ seconds</span>
+                <span>Bored: {'<'} 1 click per second for 5+ seconds</span>
               </div>
             </div>
           </div>
