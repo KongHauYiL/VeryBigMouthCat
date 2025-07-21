@@ -7,6 +7,7 @@ import { PartyRoomModal } from '@/components/PartyRoomModal';
 import { PopWarsModal } from '@/components/PopWarsModal';
 import { useGlobalTaps } from '@/hooks/useGlobalTaps';
 import { usePartyRoom } from '@/hooks/usePartyRoom';
+import { useLuckMultiplier } from '@/hooks/useLuckMultiplier';
 
 const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -15,7 +16,11 @@ const Index = () => {
   
   const { currentRoom, updateLastActive } = usePartyRoom();
   const partyMultiplier = currentRoom?.multiplier || 1;
-  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(partyMultiplier);
+  const { currentMultiplier: luckMultiplier } = useLuckMultiplier();
+  
+  // Calculate total multiplier for global taps
+  const totalMultiplier = partyMultiplier * luckMultiplier;
+  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(totalMultiplier);
 
   // Apply dark mode (always enabled)
   useEffect(() => {
