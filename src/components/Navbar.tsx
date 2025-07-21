@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Settings, Users } from 'lucide-react';
+import { Settings, Users, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface NavbarProps {
@@ -8,6 +8,7 @@ interface NavbarProps {
   isLoading: boolean;
   onSettingsToggle: () => void;
   onPartyToggle: () => void;
+  onPopWarsToggle: () => void;
   partyMultiplier?: number;
 }
 
@@ -16,6 +17,7 @@ export function Navbar({
   isLoading,
   onSettingsToggle,
   onPartyToggle,
+  onPopWarsToggle,
   partyMultiplier = 1
 }: NavbarProps) {
   return (
@@ -42,6 +44,16 @@ export function Navbar({
               <span className="text-sm font-medium text-green-400">{partyMultiplier}x Party!</span>
             </div>
           )}
+
+          {/* Pop Wars Button */}
+          <Button 
+            onClick={onPopWarsToggle} 
+            variant="ghost" 
+            size="icon" 
+            className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md border border-purple-500/30 hover:from-purple-500/30 hover:to-pink-500/30 rounded-xl h-10 w-10"
+          >
+            <Swords className="h-4 w-4" />
+          </Button>
 
           {/* Party Room Button */}
           <Button 

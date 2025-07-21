@@ -115,6 +115,56 @@ export type Database = {
         }
         Relationships: []
       }
+      pop_wars_choices: {
+        Row: {
+          choice_text: string
+          created_at: string
+          id: string
+          updated_at: string
+          vote_count: number
+        }
+        Insert: {
+          choice_text: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          vote_count?: number
+        }
+        Update: {
+          choice_text?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          vote_count?: number
+        }
+        Relationships: []
+      }
+      pop_wars_votes: {
+        Row: {
+          choice_id: string | null
+          created_at: string
+          id: string
+        }
+        Insert: {
+          choice_id?: string | null
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          choice_id?: string | null
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pop_wars_votes_choice_id_fkey"
+            columns: ["choice_id"]
+            isOneToOne: false
+            referencedRelation: "pop_wars_choices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

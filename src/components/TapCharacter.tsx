@@ -111,6 +111,7 @@ export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) 
             alt="BigMouthCat"
             className="w-full h-full object-contain drop-shadow-2xl"
             onError={(e) => {
+              console.log('Failed to load image:', e.currentTarget.src);
               // Fallback to default image if special images don't load
               e.currentTarget.src = isMouthOpen 
                 ? "/lovable-uploads/20f26be6-ed3d-4bd1-864d-10e906df4ff5.png" 
@@ -125,11 +126,6 @@ export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) 
               <div className="absolute -top-4 -right-4 text-pink-400 animate-bounce delay-75 text-2xl">💫</div>
               <div className="absolute -bottom-4 -left-4 text-blue-400 animate-bounce delay-150 text-2xl">⭐</div>
               <div className="absolute -bottom-4 -right-4 text-green-400 animate-bounce delay-200 text-2xl">🌟</div>
-              {partyMultiplier > 1 && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-green-400 animate-bounce text-3xl font-bold">
-                  {partyMultiplier}x
-                </div>
-              )}
             </>
           )}
         </div>
@@ -145,11 +141,6 @@ export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) 
         )}
         {isSlowClicking && !isFastClicking && !isNightTime && (
           <p className="text-gray-400 text-sm">😑 Bored...</p>
-        )}
-        {partyMultiplier > 1 && (
-          <p className="text-green-400 font-bold text-sm animate-pulse">
-            🎉 Party Mode: {partyMultiplier}x Multiplier!
-          </p>
         )}
       </div>
     </div>
