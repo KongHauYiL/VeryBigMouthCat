@@ -91,7 +91,7 @@ const Index = () => {
             <div className="px-6 py-4 text-center">
               <div className="flex justify-center">
                 <div>
-                  <p className="text-white/80 text-xs font-medium tracking-wide uppercase mb-1">GLOBAL TAPS - VOTE FOR US ON LAUNCHED.LOVABLE.DEV!!!</p>
+                  <p className="text-white/80 text-xs font-medium tracking-wide uppercase mb-1">GLOBAL TAPS</p>
                   <p className="text-2xl font-bold text-white drop-shadow-lg">
                     {isLoading ? <span className="animate-pulse">---.---</span> : globalTaps.toLocaleString()}
                   </p>
