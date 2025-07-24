@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { useClickTracking } from '@/hooks/useClickTracking';
@@ -23,7 +22,7 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
   const getCharacterImage = () => {
     // Priority: Laser eyes > Sleepy > Bored > Normal
     if (isFastClicking) {
-      return "/lovable-uploads/laser-eyes-cat.png";
+      return "/public/lovable-uploads/laser-eyes-cat.png";
     }
     if (isNightTime && !isFastClicking) {
       return "/lovable-uploads/sleepy-cat.png";
