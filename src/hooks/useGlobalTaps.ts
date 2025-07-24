@@ -3,7 +3,13 @@ import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export function useGlobalTaps(multiplier: number = 1) {
+interface SelectedContinent {
+  code: string;
+  name: string;
+  flag: string;
+}
+
+export function useGlobalTaps(multiplier: number = 1, selectedContinent: SelectedContinent | null = null) {
   const [globalTaps, setGlobalTaps] = useState(0);
   const queryClient = useQueryClient();
 
@@ -35,6 +41,7 @@ export function useGlobalTaps(multiplier: number = 1) {
 
   const handleTap = async () => {
     console.log('Handling tap with multiplier:', multiplier);
+    console.log('Selected continent:', selectedContinent);
     
     // Optimistically update the UI
     const increment = multiplier;
@@ -60,7 +67,10 @@ export function useGlobalTaps(multiplier: number = 1) {
       // Track continent tap via edge function
       try {
         const { error: continentError } = await supabase.functions.invoke('track-continent-tap', {
-          body: { taps: increment }
+          body: { 
+            taps: increment,
+            selectedContinent: selectedContinent
+          }
         });
 
         if (continentError) {

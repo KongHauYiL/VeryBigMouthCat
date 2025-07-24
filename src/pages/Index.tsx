@@ -7,9 +7,11 @@ import { PartyRoomModal } from '@/components/PartyRoomModal';
 import { PopWarsModal } from '@/components/PopWarsModal';
 import { LeaderboardModal } from '@/components/LeaderboardModal';
 import { ComboDisplay } from '@/components/ComboDisplay';
+import { ContinentSelectionModal } from '@/components/ContinentSelectionModal';
 import { useGlobalTaps } from '@/hooks/useGlobalTaps';
 import { usePartyRoom } from '@/hooks/usePartyRoom';
 import { useComboCounter } from '@/hooks/useComboCounter';
+import { useSelectedContinent } from '@/hooks/useSelectedContinent';
 
 const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -21,8 +23,9 @@ const Index = () => {
   const partyMultiplier = currentRoom?.multiplier || 1;
   
   const { combo, isComboActive } = useComboCounter();
+  const { selectedContinent, hasSelectedContinent, selectContinent } = useSelectedContinent();
   
-  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(partyMultiplier);
+  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(partyMultiplier, selectedContinent);
 
   // Apply dark mode (always enabled)
   useEffect(() => {
@@ -71,6 +74,10 @@ const Index = () => {
     if (currentRoom) {
       updateLastActive();
     }
+  };
+
+  const handleContinentSelect = (continent: { code: string; name: string; flag: string }) => {
+    selectContinent(continent);
   };
 
   return (
@@ -143,6 +150,13 @@ const Index = () => {
                     </p>
                   </div>
                 )}
+                {selectedContinent && (
+                  <div className="bg-blue-500/20 rounded-lg px-3 py-1 border border-blue-500/30">
+                    <p className="text-blue-200 text-sm font-medium">
+                      {selectedContinent.flag} {selectedContinent.name}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -150,6 +164,10 @@ const Index = () => {
       </div>
 
       {/* Modals */}
+      <ContinentSelectionModal 
+        isOpen={!hasSelectedContinent}
+        onSelectContinent={handleContinentSelect}
+      />
       <SettingsPanel isOpen={isSettingsOpen} onToggle={() => setIsSettingsOpen(!isSettingsOpen)} />
       <PartyRoomModal isOpen={isPartyOpen} onClose={() => setIsPartyOpen(false)} />
       <PopWarsModal 
