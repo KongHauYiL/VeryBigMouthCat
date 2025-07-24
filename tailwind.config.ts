@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -84,11 +85,56 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'slide-in-right': {
+					'0%': { transform: 'translateX(100%)', opacity: '0' },
+					'100%': { transform: 'translateX(0)', opacity: '1' }
+				},
+				'slide-out-right': {
+					'0%': { transform: 'translateX(0)', opacity: '1' },
+					'100%': { transform: 'translateX(100%)', opacity: '0' }
+				},
+				'fade-in': {
+					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'scale-in': {
+					'0%': { transform: 'scale(0.95)', opacity: '0' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
+				},
+				'shake-light': {
+					'0%, 100%': { transform: 'translateX(0)' },
+					'25%': { transform: 'translateX(-2px)' },
+					'75%': { transform: 'translateX(2px)' }
+				},
+				'shake-medium': {
+					'0%, 100%': { transform: 'translateX(0)' },
+					'25%': { transform: 'translateX(-4px)' },
+					'75%': { transform: 'translateX(4px)' }
+				},
+				'shake-intense': {
+					'0%, 100%': { transform: 'translateX(0)' },
+					'10%': { transform: 'translateX(-8px) translateY(-2px)' },
+					'20%': { transform: 'translateX(8px) translateY(2px)' },
+					'30%': { transform: 'translateX(-8px) translateY(-2px)' },
+					'40%': { transform: 'translateX(8px) translateY(2px)' },
+					'50%': { transform: 'translateX(-8px) translateY(-2px)' },
+					'60%': { transform: 'translateX(8px) translateY(2px)' },
+					'70%': { transform: 'translateX(-8px) translateY(-2px)' },
+					'80%': { transform: 'translateX(8px) translateY(2px)' },
+					'90%': { transform: 'translateX(-4px) translateY(-1px)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'slide-in-right': 'slide-in-right 0.3s ease-out',
+				'slide-out-right': 'slide-out-right 0.3s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'scale-in': 'scale-in 0.2s ease-out',
+				'shake-light': 'shake-light 0.2s ease-in-out',
+				'shake-medium': 'shake-medium 0.2s ease-in-out',
+				'shake-intense': 'shake-intense 0.2s ease-in-out'
 			}
 		}
 	},

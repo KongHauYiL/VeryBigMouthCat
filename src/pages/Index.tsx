@@ -5,17 +5,42 @@ import { Navbar } from '@/components/Navbar';
 import { SettingsPanel } from '@/components/SettingsPanel';
 import { PartyRoomModal } from '@/components/PartyRoomModal';
 import { PopWarsModal } from '@/components/PopWarsModal';
+import { AchievementPanel } from '@/components/AchievementPanel';
+import { UserProfile } from '@/components/UserProfile';
+import { AchievementNotification } from '@/components/AchievementNotification';
+import { ComboDisplay } from '@/components/ComboDisplay';
+import { LuckMultiplierNotification } from '@/components/LuckMultiplierNotification';
 import { useGlobalTaps } from '@/hooks/useGlobalTaps';
 import { usePartyRoom } from '@/hooks/usePartyRoom';
+import { useAchievements } from '@/hooks/useAchievements';
+import { useComboCounter } from '@/hooks/useComboCounter';
+import { useLuckMultiplier } from '@/hooks/useLuckMultiplier';
 
 const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPartyOpen, setIsPartyOpen] = useState(false);
   const [isPopWarsOpen, setIsPopWarsOpen] = useState(false);
+  const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   
   const { currentRoom, updateLastActive } = usePartyRoom();
   const partyMultiplier = currentRoom?.multiplier || 1;
-  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(partyMultiplier);
+  
+  const { 
+    recentUnlocks, 
+    recordTap, 
+    recordLaserMode, 
+    recordPartyJoin, 
+    recordPopWarsVote 
+  } = useAchievements();
+  
+  const { combo, isComboActive } = useComboCounter();
+  const { getCurrentMultiplier, getTimeRemaining } = useLuckMultiplier();
+  
+  const luckMultiplier = getCurrentMultiplier();
+  const totalMultiplier = partyMultiplier * luckMultiplier;
+  
+  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(totalMultiplier);
 
   // Apply dark mode (always enabled)
   useEffect(() => {
@@ -50,8 +75,17 @@ const Index = () => {
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
+  // Record party join achievement
+  useEffect(() => {
+    if (currentRoom) {
+      recordPartyJoin();
+    }
+  }, [currentRoom, recordPartyJoin]);
+
   const handleTap = () => {
     handleGlobalTap();
+    recordTap();
+    
     if (currentRoom) {
       updateLastActive();
     }
@@ -59,9 +93,16 @@ const Index = () => {
 
   const handlePopWarsVote = () => {
     handleGlobalTap();
+    recordTap();
+    recordPopWarsVote();
+    
     if (currentRoom) {
       updateLastActive();
     }
+  };
+
+  const handleLaserMode = () => {
+    recordLaserMode();
   };
 
   return (
@@ -73,6 +114,9 @@ const Index = () => {
         {currentRoom && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-green-300/10 to-emerald-300/10 rounded-full blur-3xl animate-pulse"></div>
         )}
+        {luckMultiplier > 1 && (
+          <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-gradient-to-r from-purple-300/10 to-pink-300/10 rounded-full blur-3xl animate-pulse"></div>
+        )}
       </div>
 
       {/* Navbar */}
@@ -82,13 +126,32 @@ const Index = () => {
         onSettingsToggle={() => setIsSettingsOpen(!isSettingsOpen)}
         onPartyToggle={() => setIsPartyOpen(!isPartyOpen)}
         onPopWarsToggle={() => setIsPopWarsOpen(!isPopWarsOpen)}
+        onAchievementsToggle={() => setIsAchievementsOpen(!isAchievementsOpen)}
+        onProfileToggle={() => setIsProfileOpen(!isProfileOpen)}
         partyMultiplier={partyMultiplier}
+        luckMultiplier={luckMultiplier}
       />
 
       {/* Main Content */}
       <div className="pt-20 pb-32 px-4 flex flex-col items-center justify-center min-h-screen">
-        <TapCharacter onTap={handleTap} partyMultiplier={partyMultiplier} />
+        <TapCharacter 
+          onTap={handleTap} 
+          partyMultiplier={partyMultiplier}
+          onLaserMode={handleLaserMode}
+        />
       </div>
+
+      {/* Floating UI Elements */}
+      <ComboDisplay combo={combo} isActive={isComboActive} />
+      <LuckMultiplierNotification 
+        multiplier={luckMultiplier} 
+        timeRemaining={getTimeRemaining()} 
+      />
+      
+      {/* Achievement Notifications */}
+      {recentUnlocks.map((achievement) => (
+        <AchievementNotification key={achievement.id} achievement={achievement} />
+      ))}
 
       {/* Bottom Global Taps Card */}
       <div className="fixed bottom-0 left-0 right-0 z-10">
@@ -118,30 +181,39 @@ const Index = () => {
                 </div>
               </div>
               
-              {currentRoom && (
-                <div className="mt-2 bg-white/20 rounded-lg px-3 py-1">
-                  <p className="text-white text-sm font-medium">
-                    🎉 {currentRoom.name} - {currentRoom.room_code}
-                  </p>
-                </div>
-              )}
+              {/* Active multipliers display */}
+              <div className="mt-2 flex justify-center space-x-2">
+                {currentRoom && (
+                  <div className="bg-green-500/20 rounded-lg px-3 py-1 border border-green-500/30">
+                    <p className="text-green-200 text-sm font-medium">
+                      🎉 {currentRoom.name} - {partyMultiplier}x
+                    </p>
+                  </div>
+                )}
+                
+                {luckMultiplier > 1 && (
+                  <div className="bg-purple-500/20 rounded-lg px-3 py-1 border border-purple-500/30">
+                    <p className="text-purple-200 text-sm font-medium">
+                      🎲 Lucky {luckMultiplier}x
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Settings Panel */}
+      {/* Modals */}
       <SettingsPanel isOpen={isSettingsOpen} onToggle={() => setIsSettingsOpen(!isSettingsOpen)} />
-
-      {/* Party Room Modal */}
       <PartyRoomModal isOpen={isPartyOpen} onClose={() => setIsPartyOpen(false)} />
-
-      {/* Pop Wars Modal */}
       <PopWarsModal 
         isOpen={isPopWarsOpen} 
         onClose={() => setIsPopWarsOpen(false)} 
         onVote={handlePopWarsVote}
       />
+      <AchievementPanel isOpen={isAchievementsOpen} onClose={() => setIsAchievementsOpen(false)} />
+      <UserProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </div>
   );
 };

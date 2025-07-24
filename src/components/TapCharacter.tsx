@@ -3,29 +3,40 @@ import React, { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { useClickTracking } from '@/hooks/useClickTracking';
 import { useTimeOfDay } from '@/hooks/useTimeOfDay';
+import { useScreenShake } from '@/hooks/useScreenShake';
+import { useComboCounter } from '@/hooks/useComboCounter';
+import { useLuckMultiplier } from '@/hooks/useLuckMultiplier';
 
 interface TapCharacterProps {
   onTap: () => void;
   partyMultiplier?: number;
+  onLaserMode?: () => void;
 }
 
-export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) {
+export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCharacterProps) {
   const { settings } = useSettings();
   const [isAnimating, setIsAnimating] = useState(false);
   const [isMouthOpen, setIsMouthOpen] = useState(false);
+  const [tapTrails, setTapTrails] = useState<Array<{id: number, x: number, y: number}>>([]);
   const { isSlowClicking, isFastClicking, recordClick } = useClickTracking();
   const { isNightTime } = useTimeOfDay();
+  const { shake } = useScreenShake();
+  const { incrementCombo } = useComboCounter();
+  const { getCurrentMultiplier, checkForLuckRoll } = useLuckMultiplier();
+
+  const luckMultiplier = getCurrentMultiplier();
+  const totalMultiplier = partyMultiplier * luckMultiplier;
 
   const getCharacterImage = () => {
     // Priority: Laser eyes > Sleepy > Bored > Normal
     if (isFastClicking) {
-      return "/lovable-uploads/laser-eyes-cat.png"; // Laser eyes for > 7 CPS
+      return "/lovable-uploads/laser-eyes-cat.png";
     }
     if (isNightTime && !isFastClicking) {
-      return "/lovable-uploads/sleepy-cat.png"; // Sleepy at night
+      return "/lovable-uploads/sleepy-cat.png";
     }
     if (isSlowClicking && !isFastClicking && !isNightTime) {
-      return "/lovable-uploads/bored-cat.png"; // Bored for < 1 CPS for 5+ seconds
+      return "/lovable-uploads/bored-cat.png";
     }
     
     // Normal states - mouth open/closed
@@ -34,17 +45,51 @@ export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) 
       : "/lovable-uploads/7ea14553-d4aa-410c-b9a7-e24d70cc057a.png";
   };
 
-  const handleTap = () => {
+  const createTapTrail = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const id = Date.now() + Math.random();
+    setTapTrails(prev => [...prev, { id, x, y }]);
+    
+    setTimeout(() => {
+      setTapTrails(prev => prev.filter(trail => trail.id !== id));
+    }, 1000);
+  };
+
+  const handleTap = (e: React.MouseEvent) => {
     setIsAnimating(true);
     setIsMouthOpen(true);
     recordClick();
+    incrementCombo();
     
-    // Haptic feedback
-    if (settings.vibrationEnabled && 'vibrate' in navigator) {
-      navigator.vibrate(50);
+    // Check for luck roll
+    const newLuckRoll = checkForLuckRoll();
+    if (newLuckRoll && newLuckRoll.value > 1) {
+      // Show luck notification will be handled by parent component
+    }
+    
+    // Create tap trail effect
+    createTapTrail(e);
+    
+    // Screen shake for high multipliers or fast clicking
+    if (totalMultiplier >= 4 || isFastClicking) {
+      shake(totalMultiplier >= 8 ? 'intense' : 'medium');
+    }
+    
+    // Trigger laser mode callback
+    if (isFastClicking && onLaserMode) {
+      onLaserMode();
     }
 
-    // Sound feedback
+    // Enhanced haptic feedback based on multiplier
+    if (settings.vibrationEnabled && 'vibrate' in navigator) {
+      const pattern = totalMultiplier >= 4 ? [50, 50, 50] : [50];
+      navigator.vibrate(pattern);
+    }
+
+    // Enhanced sound feedback
     if (settings.soundEnabled) {
       try {
         const context = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -54,7 +99,9 @@ export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) 
         oscillator.connect(gainNode);
         gainNode.connect(context.destination);
         
-        oscillator.frequency.setValueAtTime(800, context.currentTime);
+        // Different tones for different multipliers
+        const baseFreq = 800 + (totalMultiplier * 100);
+        oscillator.frequency.setValueAtTime(baseFreq, context.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(200, context.currentTime + 0.1);
         
         gainNode.gain.setValueAtTime(0.3, context.currentTime);
@@ -85,6 +132,17 @@ export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) 
         `}
         onClick={handleTap}
       >
+        {/* Tap trails */}
+        {tapTrails.map((trail) => (
+          <div
+            key={trail.id}
+            className="absolute pointer-events-none"
+            style={{ left: trail.x, top: trail.y }}
+          >
+            <div className="w-4 h-4 bg-white/50 rounded-full animate-ping" />
+          </div>
+        ))}
+        
         {/* Tap ripple effect */}
         {isAnimating && (
           <div className="absolute inset-0 rounded-full bg-rose-400/30 animate-ping scale-150" />
@@ -93,6 +151,11 @@ export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) 
         {/* Party multiplier effect */}
         {partyMultiplier > 1 && isAnimating && (
           <div className="absolute inset-0 rounded-full bg-green-400/30 animate-ping scale-175" />
+        )}
+        
+        {/* Luck multiplier effect */}
+        {luckMultiplier > 1 && isAnimating && (
+          <div className="absolute inset-0 rounded-full bg-purple-400/30 animate-ping scale-200" />
         )}
         
         {/* Special effects for laser eyes */}
@@ -112,23 +175,37 @@ export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) 
             className="w-full h-full object-contain drop-shadow-2xl"
             onError={(e) => {
               console.log('Failed to load image:', e.currentTarget.src);
-              // Fallback to default image if special images don't load
               e.currentTarget.src = isMouthOpen 
                 ? "/lovable-uploads/20f26be6-ed3d-4bd1-864d-10e906df4ff5.png" 
                 : "/lovable-uploads/7ea14553-d4aa-410c-b9a7-e24d70cc057a.png";
             }}
           />
           
-          {/* Sparkles around the cat when tapping */}
+          {/* Enhanced sparkles with multiplier effects */}
           {isAnimating && (
             <>
               <div className="absolute -top-4 -left-4 text-yellow-400 animate-bounce text-2xl">✨</div>
               <div className="absolute -top-4 -right-4 text-pink-400 animate-bounce delay-75 text-2xl">💫</div>
               <div className="absolute -bottom-4 -left-4 text-blue-400 animate-bounce delay-150 text-2xl">⭐</div>
               <div className="absolute -bottom-4 -right-4 text-green-400 animate-bounce delay-200 text-2xl">🌟</div>
+              
+              {/* Extra effects for high multipliers */}
+              {totalMultiplier >= 4 && (
+                <>
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-purple-400 animate-bounce delay-300 text-3xl">🎆</div>
+                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-orange-400 animate-bounce delay-400 text-3xl">🔥</div>
+                </>
+              )}
             </>
           )}
         </div>
+        
+        {/* Multiplier indicator */}
+        {totalMultiplier > 1 && (
+          <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-sm font-bold px-3 py-1 rounded-full shadow-lg">
+            {totalMultiplier}x
+          </div>
+        )}
       </div>
       
       {/* Character state indicator */}
@@ -141,6 +218,9 @@ export function TapCharacter({ onTap, partyMultiplier = 1 }: TapCharacterProps) 
         )}
         {isSlowClicking && !isFastClicking && !isNightTime && (
           <p className="text-gray-400 text-sm">😑 Bored...</p>
+        )}
+        {luckMultiplier > 1 && (
+          <p className="text-purple-400 font-bold text-sm animate-pulse">🎲 Lucky streak!</p>
         )}
       </div>
     </div>
