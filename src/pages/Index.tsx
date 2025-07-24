@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { TapCharacter } from '@/components/TapCharacter';
 import { Navbar } from '@/components/Navbar';
@@ -6,20 +7,20 @@ import { PartyRoomModal } from '@/components/PartyRoomModal';
 import { PopWarsModal } from '@/components/PopWarsModal';
 import { useGlobalTaps } from '@/hooks/useGlobalTaps';
 import { usePartyRoom } from '@/hooks/usePartyRoom';
+import { useLuckMultiplier } from '@/hooks/useLuckMultiplier';
+
 const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPartyOpen, setIsPartyOpen] = useState(false);
   const [isPopWarsOpen, setIsPopWarsOpen] = useState(false);
-  const {
-    currentRoom,
-    updateLastActive
-  } = usePartyRoom();
+  
+  const { currentRoom, updateLastActive } = usePartyRoom();
   const partyMultiplier = currentRoom?.multiplier || 1;
-  const {
-    globalTaps,
-    handleTap: handleGlobalTap,
-    isLoading
-  } = useGlobalTaps(partyMultiplier);
+  const { currentMultiplier: luckMultiplier } = useLuckMultiplier();
+  
+  // Calculate total multiplier for global taps
+  const totalMultiplier = partyMultiplier * luckMultiplier;
+  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(totalMultiplier);
 
   // Apply dark mode (always enabled)
   useEffect(() => {
@@ -32,6 +33,7 @@ const Index = () => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       deferredPrompt = e;
+
       setTimeout(() => {
         if (deferredPrompt && !localStorage.getItem('pwa-dismissed')) {
           const shouldInstall = confirm('Install BigMouthCat as an app for the best experience?');
@@ -52,28 +54,41 @@ const Index = () => {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
+
   const handleTap = () => {
     handleGlobalTap();
     if (currentRoom) {
       updateLastActive();
     }
   };
+
   const handlePopWarsVote = () => {
     handleGlobalTap();
     if (currentRoom) {
       updateLastActive();
     }
   };
-  return <div className="min-h-screen bg-gradient-to-br from-orange-950/20 via-rose-950/20 to-pink-950/20 relative overflow-hidden">
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-950/20 via-rose-950/20 to-pink-950/20 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-rose-300/20 to-orange-300/20 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-pink-300/20 to-rose-300/20 rounded-full blur-3xl"></div>
-        {currentRoom && <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-green-300/10 to-emerald-300/10 rounded-full blur-3xl animate-pulse"></div>}
+        {currentRoom && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-green-300/10 to-emerald-300/10 rounded-full blur-3xl animate-pulse"></div>
+        )}
       </div>
 
       {/* Navbar */}
-      <Navbar globalTaps={globalTaps} isLoading={isLoading} onSettingsToggle={() => setIsSettingsOpen(!isSettingsOpen)} onPartyToggle={() => setIsPartyOpen(!isPartyOpen)} onPopWarsToggle={() => setIsPopWarsOpen(!isPopWarsOpen)} partyMultiplier={partyMultiplier} />
+      <Navbar 
+        globalTaps={globalTaps} 
+        isLoading={isLoading} 
+        onSettingsToggle={() => setIsSettingsOpen(!isSettingsOpen)}
+        onPartyToggle={() => setIsPartyOpen(!isPartyOpen)}
+        onPopWarsToggle={() => setIsPopWarsOpen(!isPopWarsOpen)}
+        partyMultiplier={partyMultiplier}
+      />
 
       {/* Main Content */}
       <div className="pt-20 pb-32 px-4 flex flex-col items-center justify-center min-h-screen">
@@ -87,22 +102,34 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent h-24 -top-8"></div>
           
           {/* Main card */}
-          <div className={`relative backdrop-blur-xl border-t shadow-2xl ${currentRoom ? 'bg-gradient-to-r from-green-600/90 to-emerald-600/90 border-green-400/20' : 'bg-gradient-to-r from-rose-600/90 to-orange-600/90 border-white/20'}`}>
+          <div className={`relative backdrop-blur-xl border-t shadow-2xl ${
+            currentRoom 
+              ? 'bg-gradient-to-r from-green-600/90 to-emerald-600/90 border-green-400/20' 
+              : 'bg-gradient-to-r from-rose-600/90 to-orange-600/90 border-white/20'
+          }`}>
             <div className="px-6 py-4 text-center">
               <div className="flex justify-center">
                 <div>
-                  <p className="text-white/80 text-xs font-medium tracking-wide uppercase mb-1">GLOBAL TAPS</p>
+                  <p className="text-white/80 text-xs font-medium tracking-wide uppercase mb-1">
+                    Global Taps
+                  </p>
                   <p className="text-2xl font-bold text-white drop-shadow-lg">
-                    {isLoading ? <span className="animate-pulse">---.---</span> : globalTaps.toLocaleString()}
+                    {isLoading ? (
+                      <span className="animate-pulse">---.---</span>
+                    ) : (
+                      globalTaps.toLocaleString()
+                    )}
                   </p>
                 </div>
               </div>
               
-              {currentRoom && <div className="mt-2 bg-white/20 rounded-lg px-3 py-1">
+              {currentRoom && (
+                <div className="mt-2 bg-white/20 rounded-lg px-3 py-1">
                   <p className="text-white text-sm font-medium">
                     🎉 {currentRoom.name} - {currentRoom.room_code}
                   </p>
-                </div>}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -115,7 +142,13 @@ const Index = () => {
       <PartyRoomModal isOpen={isPartyOpen} onClose={() => setIsPartyOpen(false)} />
 
       {/* Pop Wars Modal */}
-      <PopWarsModal isOpen={isPopWarsOpen} onClose={() => setIsPopWarsOpen(false)} onVote={handlePopWarsVote} />
-    </div>;
+      <PopWarsModal 
+        isOpen={isPopWarsOpen} 
+        onClose={() => setIsPopWarsOpen(false)} 
+        onVote={handlePopWarsVote}
+      />
+    </div>
+  );
 };
+
 export default Index;
