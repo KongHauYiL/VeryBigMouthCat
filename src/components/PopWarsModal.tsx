@@ -22,20 +22,6 @@ export function PopWarsModal({ isOpen, onClose, onVote }: PopWarsModalProps) {
 
   const totalVotes = choices.reduce((sum, choice) => sum + choice.vote_count, 0);
 
-  // Map choices to fixed display order
-  const getDisplayText = (choice: any) => {
-    if (choice.choice_text === 'Choice 1') return 'Pepsi';
-    if (choice.choice_text === 'Choice 2') return 'Coke';
-    return choice.choice_text;
-  };
-
-  // Sort choices to ensure consistent order (Choice 1 first, then Choice 2)
-  const sortedChoices = [...choices].sort((a, b) => {
-    if (a.choice_text === 'Choice 1') return -1;
-    if (b.choice_text === 'Choice 1') return 1;
-    return 0;
-  });
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden">
@@ -59,7 +45,6 @@ export function PopWarsModal({ isOpen, onClose, onVote }: PopWarsModalProps) {
           ) : (
             <>
               <div className="text-center mb-6">
-                <h3 className="text-lg font-semibold text-white mb-2">The Superior Soda?</h3>
                 <p className="text-white/80 text-sm">
                   Vote for your choice! You can vote as many times as you want.
                 </p>
@@ -69,9 +54,8 @@ export function PopWarsModal({ isOpen, onClose, onVote }: PopWarsModalProps) {
               </div>
 
               <div className="space-y-4">
-                {sortedChoices.map((choice) => {
+                {choices.map((choice) => {
                   const percentage = totalVotes > 0 ? (choice.vote_count / totalVotes) * 100 : 0;
-                  const displayText = getDisplayText(choice);
                   
                   return (
                     <div key={choice.id} className="space-y-2">
@@ -80,7 +64,7 @@ export function PopWarsModal({ isOpen, onClose, onVote }: PopWarsModalProps) {
                         disabled={isVoting}
                         className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-4 text-lg"
                       >
-                        {displayText}
+                        {choice.choice_text}
                       </Button>
                       
                       {/* Vote count and percentage */}
