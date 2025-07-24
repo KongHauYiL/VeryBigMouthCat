@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Settings, Users, Zap } from 'lucide-react';
+import { Menu, Users, Trophy, Swords, Settings } from 'lucide-react';
 
 interface NavbarProps {
   globalTaps: number;
@@ -9,8 +8,8 @@ interface NavbarProps {
   onSettingsToggle: () => void;
   onPartyToggle: () => void;
   onPopWarsToggle: () => void;
+  onLeaderboardToggle: () => void;
   partyMultiplier?: number;
-  luckMultiplier?: number;
 }
 
 export function Navbar({ 
@@ -19,89 +18,65 @@ export function Navbar({
   onSettingsToggle, 
   onPartyToggle, 
   onPopWarsToggle,
-  partyMultiplier = 1,
-  luckMultiplier = 1
+  onLeaderboardToggle,
+  partyMultiplier = 1 
 }: NavbarProps) {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/10 border-b border-white/20">
+    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-gradient-to-r from-rose-600/90 to-orange-600/90 border-b border-white/20 shadow-2xl">
       <div className="px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Logo/Title */}
+          {/* Left side - Logo */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-orange-500 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">🐱</span>
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+              <span className="text-2xl">🐱</span>
             </div>
             <div>
-              <h1 className="text-white font-bold text-lg">BigMouthCat</h1>
-              <p className="text-white/60 text-xs">
-                {isLoading ? (
-                  <span className="animate-pulse">Loading...</span>
-                ) : (
-                  `${globalTaps.toLocaleString()} global taps`
-                )}
+              <h1 className="text-white font-bold text-lg tracking-tight">BigMouthCat</h1>
+              <p className="text-white/70 text-xs">
+                {isLoading ? 'Loading...' : `${globalTaps.toLocaleString()} total taps`}
               </p>
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Right side - Action buttons */}
           <div className="flex items-center space-x-2">
-            {/* Party Room Button */}
-            <Button
-              onClick={onPartyToggle}
-              variant="ghost"
-              size="icon"
-              className={`hover:bg-white/20 relative ${
-                partyMultiplier > 1 ? 'bg-green-500/20 border border-green-500/30' : ''
-              }`}
+            {/* Leaderboard Button */}
+            <button
+              onClick={onLeaderboardToggle}
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm border border-white/10"
             >
-              <Users className="h-5 w-5" />
-              {partyMultiplier > 1 && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-              )}
-            </Button>
+              <Trophy className="w-5 h-5 text-white" />
+            </button>
 
             {/* Pop Wars Button */}
-            <Button
+            <button
               onClick={onPopWarsToggle}
-              variant="ghost"
-              size="icon"
-              className="hover:bg-white/20"
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm border border-white/10"
             >
-              <Zap className="h-5 w-5" />
-            </Button>
+              <Swords className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Party Button */}
+            <button
+              onClick={onPartyToggle}
+              className={`p-2 rounded-xl transition-all duration-200 backdrop-blur-sm border ${
+                partyMultiplier > 1 
+                  ? 'bg-green-500/20 border-green-400/30 hover:bg-green-500/30' 
+                  : 'bg-white/10 border-white/10 hover:bg-white/20'
+              }`}
+            >
+              <Users className={`w-5 h-5 ${partyMultiplier > 1 ? 'text-green-300' : 'text-white'}`} />
+            </button>
 
             {/* Settings Button */}
-            <Button
+            <button
               onClick={onSettingsToggle}
-              variant="ghost"
-              size="icon"
-              className="hover:bg-white/20"
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm border border-white/10"
             >
-              <Settings className="h-5 w-5" />
-            </Button>
+              <Settings className="w-5 h-5 text-white" />
+            </button>
           </div>
         </div>
-
-        {/* Active Multipliers Indicator */}
-        {(partyMultiplier > 1 || luckMultiplier > 1) && (
-          <div className="mt-2 flex justify-center space-x-2">
-            {partyMultiplier > 1 && (
-              <div className="bg-green-500/20 rounded-lg px-2 py-1 border border-green-500/30">
-                <p className="text-green-200 text-xs font-medium">
-                  🎉 Party {partyMultiplier}x
-                </p>
-              </div>
-            )}
-            
-            {luckMultiplier > 1 && (
-              <div className="bg-purple-500/20 rounded-lg px-2 py-1 border border-purple-500/30">
-                <p className="text-purple-200 text-xs font-medium">
-                  🎲 Lucky {luckMultiplier}x
-                </p>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </nav>
   );

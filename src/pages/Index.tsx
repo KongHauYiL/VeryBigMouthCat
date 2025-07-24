@@ -5,28 +5,24 @@ import { Navbar } from '@/components/Navbar';
 import { SettingsPanel } from '@/components/SettingsPanel';
 import { PartyRoomModal } from '@/components/PartyRoomModal';
 import { PopWarsModal } from '@/components/PopWarsModal';
+import { LeaderboardModal } from '@/components/LeaderboardModal';
 import { ComboDisplay } from '@/components/ComboDisplay';
-import { LuckMultiplierNotification } from '@/components/LuckMultiplierNotification';
 import { useGlobalTaps } from '@/hooks/useGlobalTaps';
 import { usePartyRoom } from '@/hooks/usePartyRoom';
 import { useComboCounter } from '@/hooks/useComboCounter';
-import { useLuckMultiplier } from '@/hooks/useLuckMultiplier';
 
 const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPartyOpen, setIsPartyOpen] = useState(false);
   const [isPopWarsOpen, setIsPopWarsOpen] = useState(false);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   
   const { currentRoom, updateLastActive } = usePartyRoom();
   const partyMultiplier = currentRoom?.multiplier || 1;
   
   const { combo, isComboActive } = useComboCounter();
-  const { getCurrentMultiplier, getTimeRemaining } = useLuckMultiplier();
   
-  const luckMultiplier = getCurrentMultiplier();
-  const totalMultiplier = partyMultiplier * luckMultiplier;
-  
-  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(totalMultiplier);
+  const { globalTaps, handleTap: handleGlobalTap, isLoading } = useGlobalTaps(partyMultiplier);
 
   // Apply dark mode (always enabled)
   useEffect(() => {
@@ -86,9 +82,6 @@ const Index = () => {
         {currentRoom && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-green-300/10 to-emerald-300/10 rounded-full blur-3xl animate-pulse"></div>
         )}
-        {luckMultiplier > 1 && (
-          <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-gradient-to-r from-purple-300/10 to-pink-300/10 rounded-full blur-3xl animate-pulse"></div>
-        )}
       </div>
 
       {/* Navbar */}
@@ -98,8 +91,8 @@ const Index = () => {
         onSettingsToggle={() => setIsSettingsOpen(!isSettingsOpen)}
         onPartyToggle={() => setIsPartyOpen(!isPartyOpen)}
         onPopWarsToggle={() => setIsPopWarsOpen(!isPopWarsOpen)}
+        onLeaderboardToggle={() => setIsLeaderboardOpen(!isLeaderboardOpen)}
         partyMultiplier={partyMultiplier}
-        luckMultiplier={luckMultiplier}
       />
 
       {/* Main Content */}
@@ -112,10 +105,6 @@ const Index = () => {
 
       {/* Floating UI Elements */}
       <ComboDisplay combo={combo} isActive={isComboActive} />
-      <LuckMultiplierNotification 
-        multiplier={luckMultiplier} 
-        timeRemaining={getTimeRemaining()} 
-      />
 
       {/* Bottom Global Taps Card */}
       <div className="fixed bottom-0 left-0 right-0 z-10">
@@ -154,14 +143,6 @@ const Index = () => {
                     </p>
                   </div>
                 )}
-                
-                {luckMultiplier > 1 && (
-                  <div className="bg-purple-500/20 rounded-lg px-3 py-1 border border-purple-500/30">
-                    <p className="text-purple-200 text-sm font-medium">
-                      🎲 Lucky {luckMultiplier}x
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -175,6 +156,10 @@ const Index = () => {
         isOpen={isPopWarsOpen} 
         onClose={() => setIsPopWarsOpen(false)} 
         onVote={handlePopWarsVote}
+      />
+      <LeaderboardModal 
+        isOpen={isLeaderboardOpen} 
+        onClose={() => setIsLeaderboardOpen(false)} 
       />
     </div>
   );

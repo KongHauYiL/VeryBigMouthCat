@@ -4,7 +4,6 @@ import { useSettings } from '@/hooks/useSettings';
 import { useClickTracking } from '@/hooks/useClickTracking';
 import { useTimeOfDay } from '@/hooks/useTimeOfDay';
 import { useComboCounter } from '@/hooks/useComboCounter';
-import { useLuckMultiplier } from '@/hooks/useLuckMultiplier';
 
 interface TapCharacterProps {
   onTap: () => void;
@@ -20,10 +19,6 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
   const { isSlowClicking, isFastClicking, recordClick } = useClickTracking();
   const { isNightTime } = useTimeOfDay();
   const { incrementCombo } = useComboCounter();
-  const { getCurrentMultiplier, checkForLuckRoll } = useLuckMultiplier();
-
-  const luckMultiplier = getCurrentMultiplier();
-  const totalMultiplier = partyMultiplier * luckMultiplier;
 
   const getCharacterImage = () => {
     // Priority: Laser eyes > Sleepy > Bored > Normal
@@ -62,12 +57,6 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
     recordClick();
     incrementCombo();
     
-    // Check for luck roll
-    const newLuckRoll = checkForLuckRoll();
-    if (newLuckRoll && newLuckRoll.value > 1) {
-      // Show luck notification will be handled by parent component
-    }
-    
     // Create tap trail effect
     createTapTrail(e);
     
@@ -78,7 +67,7 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
 
     // Enhanced haptic feedback based on multiplier
     if (settings.vibrationEnabled && 'vibrate' in navigator) {
-      const pattern = totalMultiplier >= 4 ? [50, 50, 50] : [50];
+      const pattern = partyMultiplier >= 4 ? [50, 50, 50] : [50];
       navigator.vibrate(pattern);
     }
 
@@ -93,7 +82,7 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
         gainNode.connect(context.destination);
         
         // Different tones for different multipliers
-        const baseFreq = 800 + (totalMultiplier * 100);
+        const baseFreq = 800 + (partyMultiplier * 100);
         oscillator.frequency.setValueAtTime(baseFreq, context.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(200, context.currentTime + 0.1);
         
@@ -146,11 +135,6 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
           <div className="absolute inset-0 rounded-full bg-green-400/30 animate-ping scale-175" />
         )}
         
-        {/* Luck multiplier effect */}
-        {luckMultiplier > 1 && isAnimating && (
-          <div className="absolute inset-0 rounded-full bg-purple-400/30 animate-ping scale-200" />
-        )}
-        
         {/* Special effects for laser eyes */}
         {isFastClicking && (
           <>
@@ -182,7 +166,7 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
               <div className="absolute -bottom-4 -right-4 text-green-400 animate-bounce delay-200 text-2xl">🌟</div>
               
               {/* Extra effects for high multipliers */}
-              {totalMultiplier >= 4 && (
+              {partyMultiplier >= 4 && (
                 <>
                   <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-purple-400 animate-bounce delay-300 text-3xl">🎆</div>
                   <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-orange-400 animate-bounce delay-400 text-3xl">🔥</div>
@@ -193,9 +177,9 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
         </div>
         
         {/* Multiplier indicator */}
-        {totalMultiplier > 1 && (
+        {partyMultiplier > 1 && (
           <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-sm font-bold px-3 py-1 rounded-full shadow-lg">
-            {totalMultiplier}x
+            {partyMultiplier}x
           </div>
         )}
       </div>
@@ -210,9 +194,6 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
         )}
         {isSlowClicking && !isFastClicking && !isNightTime && (
           <p className="text-gray-400 text-sm">😑 Bored...</p>
-        )}
-        {luckMultiplier > 1 && (
-          <p className="text-purple-400 font-bold text-sm animate-pulse">🎲 Lucky streak!</p>
         )}
       </div>
     </div>
