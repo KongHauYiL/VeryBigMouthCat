@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { useClickTracking } from '@/hooks/useClickTracking';
 import { useTimeOfDay } from '@/hooks/useTimeOfDay';
-import { useScreenShake } from '@/hooks/useScreenShake';
 import { useComboCounter } from '@/hooks/useComboCounter';
 import { useLuckMultiplier } from '@/hooks/useLuckMultiplier';
 
@@ -20,7 +19,6 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
   const [tapTrails, setTapTrails] = useState<Array<{id: number, x: number, y: number}>>([]);
   const { isSlowClicking, isFastClicking, recordClick } = useClickTracking();
   const { isNightTime } = useTimeOfDay();
-  const { shake } = useScreenShake();
   const { incrementCombo } = useComboCounter();
   const { getCurrentMultiplier, checkForLuckRoll } = useLuckMultiplier();
 
@@ -72,11 +70,6 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
     
     // Create tap trail effect
     createTapTrail(e);
-    
-    // Screen shake for high multipliers or fast clicking
-    if (totalMultiplier >= 4 || isFastClicking) {
-      shake(totalMultiplier >= 8 ? 'intense' : 'medium');
-    }
     
     // Trigger laser mode callback
     if (isFastClicking && onLaserMode) {
@@ -171,7 +164,6 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
         <div className="relative w-48 h-48 sm:w-56 sm:h-56">
           <img 
             src={getCharacterImage()}
-            alt="BigMouthCat"
             className="w-full h-full object-contain drop-shadow-2xl"
             onError={(e) => {
               console.log('Failed to load image:', e.currentTarget.src);

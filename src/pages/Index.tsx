@@ -5,14 +5,10 @@ import { Navbar } from '@/components/Navbar';
 import { SettingsPanel } from '@/components/SettingsPanel';
 import { PartyRoomModal } from '@/components/PartyRoomModal';
 import { PopWarsModal } from '@/components/PopWarsModal';
-import { AchievementPanel } from '@/components/AchievementPanel';
-import { UserProfile } from '@/components/UserProfile';
-import { AchievementNotification } from '@/components/AchievementNotification';
 import { ComboDisplay } from '@/components/ComboDisplay';
 import { LuckMultiplierNotification } from '@/components/LuckMultiplierNotification';
 import { useGlobalTaps } from '@/hooks/useGlobalTaps';
 import { usePartyRoom } from '@/hooks/usePartyRoom';
-import { useAchievements } from '@/hooks/useAchievements';
 import { useComboCounter } from '@/hooks/useComboCounter';
 import { useLuckMultiplier } from '@/hooks/useLuckMultiplier';
 
@@ -20,19 +16,9 @@ const Index = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPartyOpen, setIsPartyOpen] = useState(false);
   const [isPopWarsOpen, setIsPopWarsOpen] = useState(false);
-  const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   
   const { currentRoom, updateLastActive } = usePartyRoom();
   const partyMultiplier = currentRoom?.multiplier || 1;
-  
-  const { 
-    recentUnlocks, 
-    recordTap, 
-    recordLaserMode, 
-    recordPartyJoin, 
-    recordPopWarsVote 
-  } = useAchievements();
   
   const { combo, isComboActive } = useComboCounter();
   const { getCurrentMultiplier, getTimeRemaining } = useLuckMultiplier();
@@ -75,16 +61,8 @@ const Index = () => {
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
-  // Record party join achievement
-  useEffect(() => {
-    if (currentRoom) {
-      recordPartyJoin();
-    }
-  }, [currentRoom, recordPartyJoin]);
-
   const handleTap = () => {
     handleGlobalTap();
-    recordTap();
     
     if (currentRoom) {
       updateLastActive();
@@ -93,16 +71,10 @@ const Index = () => {
 
   const handlePopWarsVote = () => {
     handleGlobalTap();
-    recordTap();
-    recordPopWarsVote();
     
     if (currentRoom) {
       updateLastActive();
     }
-  };
-
-  const handleLaserMode = () => {
-    recordLaserMode();
   };
 
   return (
@@ -126,8 +98,6 @@ const Index = () => {
         onSettingsToggle={() => setIsSettingsOpen(!isSettingsOpen)}
         onPartyToggle={() => setIsPartyOpen(!isPartyOpen)}
         onPopWarsToggle={() => setIsPopWarsOpen(!isPopWarsOpen)}
-        onAchievementsToggle={() => setIsAchievementsOpen(!isAchievementsOpen)}
-        onProfileToggle={() => setIsProfileOpen(!isProfileOpen)}
         partyMultiplier={partyMultiplier}
         luckMultiplier={luckMultiplier}
       />
@@ -137,7 +107,6 @@ const Index = () => {
         <TapCharacter 
           onTap={handleTap} 
           partyMultiplier={partyMultiplier}
-          onLaserMode={handleLaserMode}
         />
       </div>
 
@@ -147,11 +116,6 @@ const Index = () => {
         multiplier={luckMultiplier} 
         timeRemaining={getTimeRemaining()} 
       />
-      
-      {/* Achievement Notifications */}
-      {recentUnlocks.map((achievement) => (
-        <AchievementNotification key={achievement.id} achievement={achievement} />
-      ))}
 
       {/* Bottom Global Taps Card */}
       <div className="fixed bottom-0 left-0 right-0 z-10">
@@ -212,8 +176,6 @@ const Index = () => {
         onClose={() => setIsPopWarsOpen(false)} 
         onVote={handlePopWarsVote}
       />
-      <AchievementPanel isOpen={isAchievementsOpen} onClose={() => setIsAchievementsOpen(false)} />
-      <UserProfile isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </div>
   );
 };
