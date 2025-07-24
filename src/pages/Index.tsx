@@ -8,6 +8,7 @@ import { PopWarsModal } from '@/components/PopWarsModal';
 import { LeaderboardModal } from '@/components/LeaderboardModal';
 import { ComboDisplay } from '@/components/ComboDisplay';
 import { ContinentSelectionModal } from '@/components/ContinentSelectionModal';
+import { GlobalTapsCard } from '@/components/GlobalTapsCard';
 import { useGlobalTaps } from '@/hooks/useGlobalTaps';
 import { usePartyRoom } from '@/hooks/usePartyRoom';
 import { useComboCounter } from '@/hooks/useComboCounter';
@@ -81,14 +82,19 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-950/20 via-rose-950/20 to-pink-950/20 relative overflow-hidden">
-      {/* Background decoration */}
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background relative overflow-hidden">
+      {/* Enhanced Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-rose-300/20 to-orange-300/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-pink-300/20 to-rose-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute -top-96 -right-96 w-[800px] h-[800px] bg-gradient-to-br from-primary/10 via-accent/5 to-transparent rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-96 -left-96 w-[800px] h-[800px] bg-gradient-to-tr from-secondary/10 via-muted/10 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
         {currentRoom && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-green-300/10 to-emerald-300/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-green-500/5 to-emerald-500/5 rounded-full blur-3xl animate-pulse"></div>
         )}
+        
+        {/* Floating orbs */}
+        <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-bounce" style={{animationDelay: '0s', animationDuration: '3s'}}></div>
+        <div className="absolute top-40 right-32 w-24 h-24 bg-gradient-to-r from-pink-400/20 to-rose-400/20 rounded-full blur-xl animate-bounce" style={{animationDelay: '1s', animationDuration: '4s'}}></div>
+        <div className="absolute bottom-32 left-40 w-20 h-20 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-full blur-xl animate-bounce" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
       </div>
 
       {/* Navbar */}
@@ -103,65 +109,26 @@ const Index = () => {
       />
 
       {/* Main Content */}
-      <div className="pt-20 pb-32 px-4 flex flex-col items-center justify-center min-h-screen">
-        <TapCharacter 
-          onTap={handleTap} 
-          partyMultiplier={partyMultiplier}
-        />
+      <div className="pt-24 pb-40 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-screen">
+        <div className="w-full max-w-4xl mx-auto">
+          <TapCharacter 
+            onTap={handleTap} 
+            partyMultiplier={partyMultiplier}
+          />
+        </div>
       </div>
 
       {/* Floating UI Elements */}
       <ComboDisplay combo={combo} isActive={isComboActive} />
 
-      {/* Bottom Global Taps Card */}
-      <div className="fixed bottom-0 left-0 right-0 z-10">
-        <div className="relative">
-          {/* Gradient backdrop */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent h-24 -top-8"></div>
-          
-          {/* Main card */}
-          <div className={`relative backdrop-blur-xl border-t shadow-2xl ${
-            currentRoom 
-              ? 'bg-gradient-to-r from-green-600/90 to-emerald-600/90 border-green-400/20' 
-              : 'bg-gradient-to-r from-rose-600/90 to-orange-600/90 border-white/20'
-          }`}>
-            <div className="px-6 py-4 text-center">
-              <div className="flex justify-center">
-                <div>
-                  <p className="text-white/80 text-xs font-medium tracking-wide uppercase mb-1">
-                    Global Taps
-                  </p>
-                  <p className="text-2xl font-bold text-white drop-shadow-lg">
-                    {isLoading ? (
-                      <span className="animate-pulse">---.---</span>
-                    ) : (
-                      globalTaps.toLocaleString()
-                    )}
-                  </p>
-                </div>
-              </div>
-              
-              {/* Active multipliers display */}
-              <div className="mt-2 flex justify-center space-x-2">
-                {currentRoom && (
-                  <div className="bg-green-500/20 rounded-lg px-3 py-1 border border-green-500/30">
-                    <p className="text-green-200 text-sm font-medium">
-                      🎉 {currentRoom.name} - {partyMultiplier}x
-                    </p>
-                  </div>
-                )}
-                {selectedContinent && (
-                  <div className="bg-blue-500/20 rounded-lg px-3 py-1 border border-blue-500/30">
-                    <p className="text-blue-200 text-sm font-medium">
-                      {selectedContinent.flag} {selectedContinent.name}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Enhanced Global Taps Card */}
+      <GlobalTapsCard 
+        globalTaps={globalTaps}
+        isLoading={isLoading}
+        currentRoom={currentRoom}
+        partyMultiplier={partyMultiplier}
+        selectedContinent={selectedContinent}
+      />
 
       {/* Modals */}
       <ContinentSelectionModal 
