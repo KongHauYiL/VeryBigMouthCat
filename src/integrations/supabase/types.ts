@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      continent_taps: {
+        Row: {
+          continent_code: string
+          continent_name: string
+          created_at: string
+          flag_emoji: string
+          id: string
+          total_taps: number
+          updated_at: string
+        }
+        Insert: {
+          continent_code: string
+          continent_name: string
+          created_at?: string
+          flag_emoji: string
+          id?: string
+          total_taps?: number
+          updated_at?: string
+        }
+        Update: {
+          continent_code?: string
+          continent_name?: string
+          created_at?: string
+          flag_emoji?: string
+          id?: string
+          total_taps?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       global_taps: {
         Row: {
           id: string
@@ -170,7 +200,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_continent_taps: {
+        Args: {
+          p_continent_code: string
+          p_continent_name: string
+          p_flag_emoji: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

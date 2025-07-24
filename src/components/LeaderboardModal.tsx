@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { X, Trophy, Medal, Award, Globe, Crown } from 'lucide-react';
-import { useCountryLeaderboard } from '@/hooks/useCountryLeaderboard';
+import { useContinentLeaderboard } from '@/hooks/useContinentLeaderboard';
 
 interface LeaderboardModalProps {
   isOpen: boolean;
@@ -9,12 +9,12 @@ interface LeaderboardModalProps {
 }
 
 export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
-  const { countries, isLoading } = useCountryLeaderboard();
+  const { continents, isLoading } = useContinentLeaderboard();
 
   if (!isOpen) return null;
 
-  const topThree = countries.slice(0, 3);
-  const restOfTop5 = countries.slice(3, 5);
+  const topThree = continents.slice(0, 3);
+  const restOfContinents = continents.slice(3);
 
   const getPodiumHeight = (position: number) => {
     switch (position) {
@@ -53,8 +53,8 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
               <Globe className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Global Leaderboard</h2>
-              <p className="text-sm text-white/60">Top Countries by Taps</p>
+              <h2 className="text-xl font-bold text-white">Continental Leaderboard</h2>
+              <p className="text-sm text-white/60">Top Continents by Taps</p>
             </div>
           </div>
           <button
@@ -95,7 +95,7 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
                         <Trophy className="w-5 h-5 text-white" />
                       </div>
                       <div className="text-center mt-2">
-                        <p className="text-white font-medium text-sm">{topThree[1].country_name}</p>
+                        <p className="text-white font-medium text-sm">{topThree[1].continent_name}</p>
                         <p className="text-white/60 text-xs">{topThree[1].total_taps.toLocaleString()}</p>
                       </div>
                     </div>
@@ -116,7 +116,7 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
                         <Crown className="w-6 h-6 text-white" />
                       </div>
                       <div className="text-center mt-2">
-                        <p className="text-white font-bold">{topThree[0].country_name}</p>
+                        <p className="text-white font-bold">{topThree[0].continent_name}</p>
                         <p className="text-yellow-400 font-bold text-sm">{topThree[0].total_taps.toLocaleString()}</p>
                       </div>
                     </div>
@@ -137,7 +137,7 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
                         <Medal className="w-5 h-5 text-white" />
                       </div>
                       <div className="text-center mt-2">
-                        <p className="text-white font-medium text-sm">{topThree[2].country_name}</p>
+                        <p className="text-white font-medium text-sm">{topThree[2].continent_name}</p>
                         <p className="text-white/60 text-xs">{topThree[2].total_taps.toLocaleString()}</p>
                       </div>
                     </div>
@@ -145,15 +145,15 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
                 </div>
               </div>
 
-              {/* Rest of Top 5 */}
-              {restOfTop5.length > 0 && (
+              {/* Rest of Continents */}
+              {restOfContinents.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-md font-bold text-white/80 text-center">Also Competing</h3>
-                  {restOfTop5.map((country, index) => {
+                  <h3 className="text-md font-bold text-white/80 text-center">Other Continents</h3>
+                  {restOfContinents.map((continent, index) => {
                     const position = index + 4;
                     return (
                       <div
-                        key={country.id}
+                        key={continent.id}
                         className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm"
                       >
                         <div className="flex items-center justify-between">
@@ -162,10 +162,10 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
                               <span className="text-white/60 font-bold text-sm">{position}</span>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="text-2xl">{country.flag_emoji}</span>
+                              <span className="text-2xl">{continent.flag_emoji}</span>
                               <div>
-                                <p className="text-white font-medium">{country.country_name}</p>
-                                <p className="text-white/60 text-sm">{country.total_taps.toLocaleString()} taps</p>
+                                <p className="text-white font-medium">{continent.continent_name}</p>
+                                <p className="text-white/60 text-sm">{continent.total_taps.toLocaleString()} taps</p>
                               </div>
                             </div>
                           </div>
@@ -182,7 +182,7 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
         {/* Footer */}
         <div className="p-4 border-t border-white/10 bg-white/5">
           <p className="text-white/60 text-sm text-center">
-            🌍 Rankings update in real-time • Keep tapping to boost your country!
+            🌍 Rankings update in real-time • Keep tapping to boost your continent!
           </p>
         </div>
       </div>
