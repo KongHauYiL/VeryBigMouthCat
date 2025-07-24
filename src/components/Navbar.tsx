@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Menu, Users, Trophy, Swords, Settings } from 'lucide-react';
+import { Users, Trophy, Swords, Settings } from 'lucide-react';
 
 interface NavbarProps {
   globalTaps: number;
@@ -28,7 +28,10 @@ export function Navbar({
           {/* Left side - Logo */}
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-              <span className="text-2xl">🐱</span>
+              <img 
+                src="/lovable-uploads/sleepy-cat.png" 
+                className="w-8 h-8 object-contain"
+              />
             </div>
             <div>
               <h1 className="text-white font-bold text-lg tracking-tight">BigMouthCat</h1>

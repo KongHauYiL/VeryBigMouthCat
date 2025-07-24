@@ -53,7 +53,8 @@ export function usePartyRoom() {
     },
     onSuccess: (room) => {
       setCurrentRoom(room);
-      joinRoom(room.room_code);
+      // Automatically join the created room
+      joinRoomMutation.mutate(room.room_code);
     }
   });
 
