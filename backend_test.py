@@ -178,20 +178,22 @@ class BackendTester:
     def test_cors_configuration(self):
         """Test CORS configuration"""
         try:
-            # Make an OPTIONS request to check CORS headers
-            response = self.session.options(f"{API_BASE}/status", timeout=5)
+            # Make a GET request with Origin header to check CORS headers
+            response = self.session.get(
+                f"{API_BASE}/", 
+                headers={'Origin': 'http://localhost:3000'},
+                timeout=5
+            )
             
-            cors_headers = {
-                'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
-                'access-control-allow-methods': response.headers.get('access-control-allow-methods'),
-                'access-control-allow-headers': response.headers.get('access-control-allow-headers')
-            }
+            cors_origin = response.headers.get('access-control-allow-origin')
+            cors_credentials = response.headers.get('access-control-allow-credentials')
             
-            if cors_headers['access-control-allow-origin'] == '*':
-                self.log_test("CORS Configuration", True, "CORS properly configured for all origins")
+            if cors_origin == '*' and cors_credentials == 'true':
+                self.log_test("CORS Configuration", True, "CORS properly configured for all origins with credentials")
                 return True
             else:
-                self.log_test("CORS Configuration", False, "CORS not properly configured", cors_headers)
+                cors_info = f"Origin: {cors_origin}, Credentials: {cors_credentials}"
+                self.log_test("CORS Configuration", False, f"CORS not properly configured - {cors_info}")
                 return False
                 
         except requests.exceptions.RequestException as e:
