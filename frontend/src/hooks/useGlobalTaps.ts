@@ -43,62 +43,27 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
   const handleTap = async () => {
     const increment = multiplier;
 
+    // Immediately update the UI optimistically for instant feedback
+    const newTotalTaps = globalTaps + increment;
+    setGlobalTaps(newTotalTaps);
+
     try {
-      // First, get the current value from database to ensure accuracy
-      const { data: currentData, error: fetchError } = await supabase
+      // Update global taps in database using the optimistically updated value
+      const { error: globalError } = await supabase
         .from('global_taps')
-        .select('total_taps')
-        .eq('id', '550e8400-e29b-41d4-a716-446655440000')
-        .single();
+        .upsert({ 
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          total_taps: newTotalTaps,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'id'
+        });
 
-      if (fetchError) {
-        console.error('Error fetching current global taps:', fetchError);
-        // If record doesn't exist, create it
-        if (fetchError.code === 'PGRST116') {
-          const { data: insertData, error: insertError } = await supabase
-            .from('global_taps')
-            .insert({ 
-              id: '550e8400-e29b-41d4-a716-446655440000',
-              total_taps: increment,
-              updated_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-
-          if (insertError) {
-            console.error('Error creating global taps record:', insertError);
-            return;
-          }
-          
-          // Update local state with new value
-          setGlobalTaps(increment);
-          
-          // Continue with continent tracking
-        } else {
-          return;
-        }
-      } else {
-        // Update with the current database value + increment
-        const newTotalTaps = (currentData?.total_taps || 0) + increment;
-        
-        // Optimistically update the UI first
-        setGlobalTaps(newTotalTaps);
-
-        // Update global taps in database
-        const { error: globalError } = await supabase
-          .from('global_taps')
-          .update({ 
-            total_taps: newTotalTaps,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', '550e8400-e29b-41d4-a716-446655440000');
-
-        if (globalError) {
-          console.error('Error updating global taps:', globalError);
-          // Revert optimistic update on error
-          setGlobalTaps(prev => prev - increment);
-          return;
-        }
+      if (globalError) {
+        console.error('Error updating global taps:', globalError);
+        // Revert optimistic update on error
+        setGlobalTaps(prev => prev - increment);
+        return;
       }
 
       // Track continent tap via edge function (for both new and existing records)
@@ -119,7 +84,7 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
         // Continue even if continent tracking fails
       }
 
-      // Invalidate queries to refetch fresh data
+      // Invalidate queries to refetch fresh data periodically
       queryClient.invalidateQueries({ queryKey: ['globalTaps'] });
       queryClient.invalidateQueries({ queryKey: ['continentLeaderboard'] });
 
