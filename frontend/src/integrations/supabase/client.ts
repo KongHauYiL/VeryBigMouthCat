@@ -4,11 +4,12 @@ import type { Database } from './types';
 
 const SUPABASE_URL = "https://zhmlliieewayqtnafmfl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpobWxsaWllZXdheXF0bmFmbWZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4MzM2NzksImV4cCI6MjA2ODQwOTY3OX0.hxZhy_3RztYeGCj7qoPUuDK4ama4IGmt1gU5ts78MDw";
+const SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpobWxsaWllZXdheXF0bmFmbWZsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MjgzMzY3OSwiZXhwIjoyMDY4NDA5Njc5fQ.nJT7gHDNnxxlwv6hC4_3LCDnvHq7cl5r9qKYq_pSAdc";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
