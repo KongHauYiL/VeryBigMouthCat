@@ -51,6 +51,7 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
   };
 
   const handleTap = (e: React.MouseEvent) => {
+    console.log('🖱️ TapCharacter: handleTap called');
     setIsAnimating(true);
     setIsMouthOpen(true);
     recordClick();
@@ -95,6 +96,7 @@ export function TapCharacter({ onTap, partyMultiplier = 1, onLaserMode }: TapCha
       }
     }
 
+    console.log('🖱️ TapCharacter: About to call onTap');
     onTap();
     
     setTimeout(() => {
