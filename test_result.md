@@ -101,3 +101,85 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Deployment error: npm error enoent Could not read package.json. Fix deployment issues and other glitches without breaking existing functionality."
+
+backend:
+  - task: "Fix missing environment variables"
+    implemented: true
+    working: true
+    file: "/app/backend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created /app/backend/.env with MONGO_URL=mongodb://localhost:27017 and DB_NAME=emergent_app. Backend now starts successfully."
+
+  - task: "Basic API endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Basic status check endpoints working. Backend has /api/status GET/POST endpoints for status checks."
+
+frontend:
+  - task: "Fix deployment package.json error"
+    implemented: true
+    working: true
+    file: "/app/package-lock.json"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Removed orphaned /app/package-lock.json file that was causing npm deployment error. The actual package.json is correctly located in /app/frontend/."
+
+  - task: "Frontend environment variables"
+    implemented: true
+    working: true
+    file: "/app/frontend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created /app/frontend/.env with REACT_APP_BACKEND_URL=http://localhost:8001. Frontend service restarted successfully."
+
+  - task: "BigMouthCat tapping game functionality"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/pages/Index.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Frontend is a sophisticated tapping game with party rooms, continent selection, PopWars, leaderboard, and combo system. However, backend APIs are missing for most features (only has basic status endpoints). Game likely not fully functional due to missing backend implementation."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Verify basic app loads and backend connectivity"
+    - "Test basic API endpoints"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Fixed critical deployment issues: 1) Removed orphaned package-lock.json from root causing npm errors, 2) Created missing .env files for both backend and frontend with proper MongoDB and backend URL configuration. All services now running. Discovered this is a BigMouthCat tapping game with extensive features but backend APIs are incomplete."
