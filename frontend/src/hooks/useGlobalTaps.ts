@@ -107,7 +107,7 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
         console.log('✅ Updated global taps from', currentData?.total_taps, 'to', newTotalTaps);
       }
 
-      // Track continent tap via edge function
+      // Track continent tap via edge function (for both new and existing records)
       try {
         const { error: continentError } = await supabase.functions.invoke('track-continent-tap', {
           body: { 
@@ -119,6 +119,8 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
         if (continentError) {
           console.error('Error tracking continent tap:', continentError);
           // Don't revert global taps for continent tracking errors
+        } else {
+          console.log('✅ Tracked continent tap for', selectedContinent?.name, 'with', increment, 'taps');
         }
       } catch (continentError) {
         console.error('Edge function error:', continentError);
