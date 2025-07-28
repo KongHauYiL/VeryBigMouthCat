@@ -174,12 +174,16 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Verify basic app loads and backend connectivity"
-    - "Test basic API endpoints"
+    - "Test basic API endpoints (/api/, /api/status GET/POST)"
+    - "Verify MongoDB connectivity and data persistence"
+    - "Check for missing backend APIs that frontend expects"
+    - "Verify environment configuration is working"
   stuck_tasks: []
-  test_all: false
+  test_all: true
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
     message: "Fixed critical deployment issues: 1) Removed orphaned package-lock.json from root causing npm errors, 2) Created missing .env files for both backend and frontend with proper MongoDB and backend URL configuration. All services now running. Discovered this is a BigMouthCat tapping game with extensive features but backend APIs are incomplete."
+  - agent: "main" 
+    message: "User requested comprehensive testing of current functionality. About to test backend first, then will ask about frontend testing. Need to verify what's working vs broken, and identify missing APIs for the BigMouthCat game features."
