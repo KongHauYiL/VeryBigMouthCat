@@ -62,6 +62,8 @@ const Index = () => {
   }, []);
 
   const handleTap = () => {
+    console.log('🖱️ Index: handleTap called');
+    console.log('🖱️ Index: About to call handleGlobalTap');
     handleGlobalTap();
     
     if (currentRoom) {
