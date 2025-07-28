@@ -41,9 +41,6 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
   }, [data]);
 
   const handleTap = async () => {
-    console.log('Handling tap with multiplier:', multiplier);
-    console.log('Selected continent:', selectedContinent);
-    
     const increment = multiplier;
 
     try {
@@ -58,7 +55,6 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
         console.error('Error fetching current global taps:', fetchError);
         // If record doesn't exist, create it
         if (fetchError.code === 'PGRST116') {
-          console.log('Creating new global_taps record...');
           const { data: insertData, error: insertError } = await supabase
             .from('global_taps')
             .insert({ 
@@ -76,7 +72,6 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
           
           // Update local state with new value
           setGlobalTaps(increment);
-          console.log('✅ Created new global_taps record with', increment, 'taps');
           
           // Continue with continent tracking
         } else {
@@ -104,8 +99,6 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
           setGlobalTaps(prev => prev - increment);
           return;
         }
-        
-        console.log('✅ Updated global taps from', currentData?.total_taps, 'to', newTotalTaps);
       }
 
       // Track continent tap via edge function (for both new and existing records)
