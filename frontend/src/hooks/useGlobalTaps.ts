@@ -46,8 +46,6 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
     // Immediately update the UI optimistically for instant feedback
     const newTotalTaps = globalTaps + increment;
     setGlobalTaps(newTotalTaps);
-    
-    console.log(`🖱️ Instant update: ${globalTaps} → ${newTotalTaps}`);
 
     try {
       // Update global taps in database using the optimistically updated value
@@ -67,8 +65,6 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
         setGlobalTaps(prev => prev - increment);
         return;
       }
-
-      console.log(`✅ Database updated to: ${newTotalTaps}`);
 
       // Track continent tap via edge function (for both new and existing records)
       try {
