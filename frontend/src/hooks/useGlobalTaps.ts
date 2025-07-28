@@ -30,7 +30,7 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
       
       return data?.total_taps || 0;
     },
-    refetchInterval: 5000, // Refresh every 5 seconds
+    refetchInterval: 10000, // Refresh every 10 seconds (less frequent to avoid conflicts)
   });
 
   // Update local state when data changes
@@ -46,6 +46,8 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
     // Immediately update the UI optimistically for instant feedback
     const newTotalTaps = globalTaps + increment;
     setGlobalTaps(newTotalTaps);
+    
+    console.log(`🖱️ Instant update: ${globalTaps} → ${newTotalTaps}`);
 
     try {
       // Update global taps in database using the optimistically updated value
@@ -66,6 +68,8 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
         return;
       }
 
+      console.log(`✅ Database updated to: ${newTotalTaps}`);
+
       // Track continent tap via edge function (for both new and existing records)
       try {
         const { error: continentError } = await supabase.functions.invoke('track-continent-tap', {
@@ -84,10 +88,9 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
         // Continue even if continent tracking fails
       }
 
-      // Invalidate queries to refetch fresh data periodically
-      queryClient.invalidateQueries({ queryKey: ['globalTaps'] });
-      queryClient.invalidateQueries({ queryKey: ['continentLeaderboard'] });
-
+      // Don't invalidate queries immediately to prevent conflicts with rapid clicking
+      // Let the periodic refetch handle it
+      
     } catch (error) {
       console.error('Error in handleTap:', error);
       // Revert optimistic update on error
