@@ -20,6 +20,7 @@ export function useGlobalTaps(multiplier: number = 1, selectedContinent: Selecte
       const { data, error } = await supabase
         .from('global_taps')
         .select('total_taps')
+        .eq('id', '550e8400-e29b-41d4-a716-446655440000')
         .single();
       
       if (error) {
